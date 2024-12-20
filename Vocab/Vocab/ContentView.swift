@@ -8,35 +8,47 @@
 import SwiftUI
 import Foundation
 import SwiftData
+import UIKit
 
 struct ContentView: View {
     var body: some View {
         NavigationView {
             VStack{
+                Text("Menu")
+                    .font(Font.custom("Rockwell-Regular", size: 60, relativeTo: .title))
+                    .background(
+                        Rectangle()
+                            .foregroundColor(.blue)
+                            .frame(width: 2000, height: 125)
+                            .offset(y: -30)
+                    )
                 Spacer()
                 VStack(spacing: 10){
                     HStack(spacing: 10){
                         Image(systemName: "plus")
-                            .font(.system(size: 20))
+                            .font(.system(size: 30))
                             .foregroundColor(.blue)
                         NavigationLink(destination: addWordPage()) {
                             Text("Add Word")
+                                .font(.system(size: 30))
                         }
                     }
                     HStack(spacing: 10){
                         Image(systemName: "pencil.and.list.clipboard")
-                            .font(.system(size: 20))
+                            .font(.system(size: 30))
                             .foregroundColor(.blue)
                         NavigationLink(destination: quizPage()) {
                             Text("Add Random Word")
+                                .font(.system(size: 30))
                         }
                     }
                     HStack(spacing: 10){
                         Image(systemName: "magazine")
-                            .font(.system(size: 20))
+                            .font(.system(size: 30))
                             .foregroundColor(.blue)
                         NavigationLink(destination: seeWordsPage()) {
                             Text("See Words")
+                                .font(.system(size: 30))
                         }
                     }
                 }
@@ -44,7 +56,7 @@ struct ContentView: View {
                 HStack(spacing: 40){
                     NavigationLink(destination: profilePage()) {
                         Image(systemName: "person.circle.fill")
-                            .font(.system(size: 20))
+                            .font(.system(size: 35))
                             .foregroundColor(.blue)
                     }
                 }
@@ -55,8 +67,15 @@ struct ContentView: View {
 }
 
 struct profilePage: View {
+    @Query private var words: [Word]
+    
     var body: some View {
-        Text("New Place")
+        Text("So far, you have added")
+            .font(.system(size: 20))
+        Text(String(words.count))
+            .font(.system(size: 40))
+        Text(words.count == 1 ? "word" : "words")
+            .font(.system(size: 20))
     }
 }
 
@@ -64,88 +83,129 @@ struct quizPage: View {
     @State var newWord: String = ""
     @State var newDefinition: String = ""
     @State var newExample: String = ""
-    let apiURL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
-
+    @State var wordOpacity = 1.0
+    
+    let blue = Color(red: 0.04, green: 0.0, blue: 1.0)
+    let argentinianBlue = Color(red: 0.376, green: 0.686, blue: 1.0)
+    let deepSkyBlue = Color(red: 0.156, green: 0.76, blue: 1.0)
+    let aqua = Color(red: 0.164, green: 0.96, blue: 1.0)
+    let celeste = Color(red: 0.725, green: 0.98, blue: 0.97)
     
     var body: some View {
+        let colorArray = [blue, argentinianBlue, deepSkyBlue, aqua, celeste]
+        
+        let randomWordColor = colorArray.randomElement()
+        
         ZStack{
             GeometryReader { geometry in
                 Circle()
                     .offset(x: -300, y: -400)
                     .frame(width: 1000, height: 820)
-                    .foregroundColor(.blue)
+                    .foregroundColor(celeste)
             }
             .edgesIgnoringSafeArea(.all)
-            VStack{
+            .offset(y: -150)
+            VStack(spacing: 20){
                 Text("Random Word")
                     .font(.system(size: 50))
                 
-                Text("In here, you will get a random word, with an example and it's description")
+                Text("""
+                    In here, you will get a random word. You should provide an example and a description for it.
+                    Press "New Word" to start and to change the word provided.
+                    """)
                     .font(.system(size: 25))
-                    .foregroundColor(.gray)
+                    .foregroundColor(.black)
                     .multilineTextAlignment(.center)
-                
-                Text(newWord)
-                    .font(.system(size: 60))
-                    .foregroundColor(.green)
-                
                 Spacer()
                 Button("New Word"){
-                    print("New")
-                    let wordList = readLinesFromFile()
-                    let word: String = wordList.randomElement() ?? ""
-                    print(wordList.count)
-//                    let requestURL = apiURL + word
-//                    Task {
-//                        await newWord = randomWordFromFile(requestURL: requestURL)
-//                    }
+                    updateWord()
                 }
                 .buttonStyle(.bordered)
                 .foregroundColor(.black)
             }
-            .offset(y: -250)
+            VStack(spacing: 20){
+                Text(newWord)
+                    .font(.system(size: 40))
+                    .foregroundColor(randomWordColor)
+                    .offset(y: -10)
+                    .opacity(wordOpacity) // Bind opacity to the state variable
+                TextField(
+                    "Example",
+                    text: $newExample
+                )
+                .background(
+                    Rectangle()
+                        .foregroundColor(aqua)
+                        .frame(height: 50)
+                        .offset(x: -50)
+                )
+                .font(.system(size: 30))
+                
+                TextField(
+                    "Description",
+                    text: $newDefinition
+                )
+                .background(
+                    Rectangle()
+                        .foregroundColor(.yellow)
+                        .frame(height: 50)
+                        .offset(x: -50)
+                )
+                .font(.system(size: 30))
+                
+            }
         }
     }
     
-    func readLinesFromFile() -> Array<String> {
+    func updateWord() {
+            // Step 1: Fade out
+            withAnimation(.easeInOut(duration: 0.5)) {
+                wordOpacity = 0.0
+            }
+            
+            // Step 2: Wait, update the word, and fade in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                newWord = getRandomWordFromFile() // Update the word
+                
+                // Step 3: Fade in
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    wordOpacity = 1.0
+                }
+            }
+        }
+    
+    func getRandomWordFromFile() -> String {
         let fileName = "words_alpha"
         let fileType = "txt"
-        var wordList: [String] = []
+        
         // Locating the file in the app bundle
         guard let fileURL = Bundle.main.url(forResource: fileName, withExtension: fileType) else {
             print("File not found in the bundle")
-            return wordList
+            return ""
         }
         
+        // Reading the contents of the file
         do {
-            // Read the contents of the file
             let fileContents = try String(contentsOf: fileURL, encoding: .utf8)
             
-            // Split the content into lines
-            let lines = fileContents.split(separator: "\n")
-
-            // Iterate through the lines
-            for line in lines {
-                wordList.append(String(line))
+            // Split the contents into words (one per line)
+            // Trim any extra newlines and spaces, then split by newline
+            let words = fileContents
+                .split(whereSeparator: \.isNewline)  // Split by newline
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }  // Trim any leading/trailing whitespace
+            
+            // Ensure there are words in the array before calling randomElement()
+            guard let randomWord = words.randomElement() else {
+                print("Error: No words found in file.")
+                return ""
             }
-            return wordList
+            
+            return randomWord
         } catch {
+            // Handle any errors that might occur while reading the file
             print("Error reading file: \(error.localizedDescription)")
         }
-        return wordList
-    }
-
-
-    func randomWordFromFile(requestURL: String) async -> String{
-        do {
-            let url = URL(string: requestURL)!
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let readings = try JSONDecoder().decode([Double].self, from: data)
-            let output = "Found \(readings.count) readings"
-            return output
-        } catch {
-            print("Download error")
-        }
+        
         return ""
     }
 }
@@ -200,9 +260,16 @@ struct seeWordsPage: View {
                 List{
                     ForEach(words){
                         word in WordCell(word: word)
+                            .frame(maxWidth: .infinity, alignment: .center)
                             .onTapGesture {
                                 wordEdit = word
                             }
+                            .listRowBackground(
+                                Capsule()
+                                    .fill(Color(white: 1, opacity: 0.8))
+                                    .padding(.vertical, 2)
+                                    .padding(.horizontal, 20)
+                            )
                     }
                     .onDelete{
                         indexSet in
@@ -212,7 +279,7 @@ struct seeWordsPage: View {
                         }
                     }
                 }
-                .navigationTitle("Words")
+                .navigationTitle("Words Added")
                 .navigationBarTitleDisplayMode(.large)
                 .sheet(item:$wordEdit){
                     word in UpdateWordSheet(word: word)
@@ -279,7 +346,6 @@ struct addWordPage: View {
                     .padding(.trailing, 20)
                 Spacer()
                 VStack(spacing: 20){
-                    
                     TextField(
                         "Word",
                         text: $word
@@ -380,5 +446,5 @@ struct addWordPage: View {
 }
 
 #Preview {
-    quizPage()
+    ContentView()
 }

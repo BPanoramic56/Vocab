@@ -14,5 +14,6 @@ struct VocabApp: App {
             ContentView()
                 .modelContainer(for: [Word.self ])
         }
+        .modelContainer(for: [Word.self ])
     }
 }
