@@ -12,6 +12,10 @@ import UIKit
 
 struct ContentView: View {
     var body: some View {
+//        Image("backgroundSee")  // Replace with your image asset name
+//            .resizable()          // Make the image resizable
+//            .scaledToFill()       // Scale the image to fill the space
+//            .edgesIgnoringSafeArea(.all)  // Extend the image to cover the whole screen, ignoring safe areas
         NavigationView {
             VStack{
                 Text("Menu")
@@ -80,21 +84,28 @@ struct profilePage: View {
 }
 
 struct quizPage: View {
+    
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
+    
     @State var newWord: String = ""
     @State var newDefinition: String = ""
     @State var newExample: String = ""
     @State var wordOpacity = 1.0
+    
+    @State var validExample = true
+    @State var wordAdded = false
+    @State var validWord = false
+    @State var randomWordColor: Color = .blue
     
     let blue = Color(red: 0.04, green: 0.0, blue: 1.0)
     let argentinianBlue = Color(red: 0.376, green: 0.686, blue: 1.0)
     let deepSkyBlue = Color(red: 0.156, green: 0.76, blue: 1.0)
     let aqua = Color(red: 0.164, green: 0.96, blue: 1.0)
     let celeste = Color(red: 0.725, green: 0.98, blue: 0.97)
-    
+
     var body: some View {
         let colorArray = [blue, argentinianBlue, deepSkyBlue, aqua, celeste]
-        
-        let randomWordColor = colorArray.randomElement()
         
         ZStack{
             GeometryReader { geometry in
@@ -108,6 +119,7 @@ struct quizPage: View {
             VStack(spacing: 20){
                 Text("Random Word")
                     .font(.system(size: 50))
+                Spacer()
                 
                 Text("""
                     In here, you will get a random word. You should provide an example and a description for it.
@@ -116,28 +128,90 @@ struct quizPage: View {
                     .font(.system(size: 25))
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
+                    .frame(width: 350)
+                    .offset(y: -150)
                 Spacer()
                 Button("New Word"){
-                    updateWord()
+                    updateWord(colorArray: colorArray)
                 }
                 .buttonStyle(.bordered)
                 .foregroundColor(.black)
+                Spacer()
+                Button("Submit Word") {
+                    if (considerExample(word: newWord, example: newExample)){
+                        validExample = true
+                        wordAdded = true
+                        let newWord = Word(wordInit: newWord.capitalized, exampleInit: newExample, descriptionInit: newDefinition, date:formattedDateAmericanStyle(from: Date.now)) // Create object
+                        context.insert(newWord) // Insert object to context
+                        wordAdded = true
+                        do {
+                            try context.save()
+                            print("SAVE")
+                        }
+                        catch {
+                            print("Error saving context: \(error)")
+                        }
+        //                dismiss()  Dismiss context
+                        print("The word was saved")
+                        updateWord(colorArray: colorArray)
+                    }
+                    else{
+                        validExample = false
+                    }
+                }
             }
+            Spacer()
             VStack(spacing: 20){
                 Text(newWord)
                     .font(.system(size: 40))
                     .foregroundColor(randomWordColor)
                     .offset(y: -10)
                     .opacity(wordOpacity) // Bind opacity to the state variable
+//                TextField(
+//                    "Example",
+//                    text: $newExample
+//                )
+//                .background(
+//                    Rectangle()
+//                        .foregroundColor(aqua)
+//                        .frame(height: 50)
+//                )
+//                .font(.system(size: 30))
+//                
+//                TextField(
+//                    "Description",
+//                    text: $newDefinition
+//                )
+//                .font(.system(size: 30))
+//                .background(
+//                    Rectangle()
+//                        .foregroundColor(.yellow)
+//                        .frame(height: 50)
+//                )
+//                TextField(
+//                    "Word",
+//                    text: $newExample
+//                )
+//                .background(
+//                    Rectangle()
+//                        .foregroundColor(.green)
+//                        .frame(height: 50)
+////                        .offset(x: -50)
+//                )
+//                .font(.system(size: 30))
+                
                 TextField(
                     "Example",
                     text: $newExample
                 )
+                .padding()
+                .offset(x: 50)
+                .cornerRadius(10)
                 .background(
                     Rectangle()
-                        .foregroundColor(aqua)
+                        .foregroundColor(.blue)
                         .frame(height: 50)
-                        .offset(x: -50)
+//                        .offset(x: -50)
                 )
                 .font(.system(size: 30))
                 
@@ -145,34 +219,77 @@ struct quizPage: View {
                     "Description",
                     text: $newDefinition
                 )
+                .padding()
+                .offset(x: 50)
+                .cornerRadius(10)
                 .background(
                     Rectangle()
-                        .foregroundColor(.yellow)
+                        .foregroundColor(.orange)
                         .frame(height: 50)
-                        .offset(x: -50)
                 )
                 .font(.system(size: 30))
                 
+                
+                Text(validExample ? "" : """
+                    The example does not utilize the word
+                    """)
+                .frame(width: validExample ? 0 : 500)
+                .frame(height: validExample ? 0 : 50)
+                
+                Text(wordAdded ? """
+                    The word was sucessufuly added!
+                    """ : "")
+                .frame(width: wordAdded ? 0 : 500)
+                .frame(height: validExample ? 0 : 50)
             }
         }
     }
     
-    func updateWord() {
-            // Step 1: Fade out
-            withAnimation(.easeInOut(duration: 0.5)) {
-                wordOpacity = 0.0
-            }
+    func considerExample(word: String, example: String) -> Bool{
+        return example.lowercased().contains(word.lowercased())
+    }
+    
+    func formattedDateAmericanStyle(from date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        
+        // Get the month and year
+        dateFormatter.dateFormat = "MMMM" // Full month name
+        let month = dateFormatter.string(from: date)
+        
+        dateFormatter.dateFormat = "yyyy" // Full year
+        let year = dateFormatter.string(from: date)
+        
+        // Get the day and add the ordinal suffix
+        let day = Calendar.current.component(.day, from: date)
+        let ordinalSuffix = getOrdinalSuffix(for: day)
+        
+        return "\(month) \(day)\(ordinalSuffix), \(year)"
+    }
+
+    func getOrdinalSuffix(for day: Int) -> String {
+        let suffixes = ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"]
+        if (11...13).contains(day % 100) { return "th" } // Special case for 11th, 12th, 13th
+        return suffixes[day % 10]
+    }
+
+    func updateWord(colorArray : [Color]) {
+        // Step 1: Fade out
+        withAnimation(.easeInOut(duration: 0.5)) {
+            wordOpacity = 0.0
+        }
+        
+        // Step 2: Wait, update the word, and fade in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            newWord = getRandomWordFromFile() // Update the word
             
-            // Step 2: Wait, update the word, and fade in
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                newWord = getRandomWordFromFile() // Update the word
-                
-                // Step 3: Fade in
-                withAnimation(.easeInOut(duration: 0.5)) {
-                    wordOpacity = 1.0
-                }
+            // Step 3: Fade in
+            withAnimation(.easeInOut(duration: 0.5)) {
+                wordOpacity = 1.0
             }
         }
+    
+        randomWordColor = colorArray.randomElement()!
+    }
     
     func getRandomWordFromFile() -> String {
         let fileName = "words_alpha"
@@ -214,7 +331,15 @@ struct WordCell: View {
     var word: Word
 
     var body: some View {
-        Text(word.word)
+        HStack {
+            Spacer()
+            Text(word.word)
+                .frame(maxWidth: .infinity, alignment: .center)
+            Text(word.dateAdded)
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
+        .frame(maxWidth: .infinity, maxHeight: 5)
+        .padding()
     }
 }
 
@@ -229,10 +354,33 @@ struct UpdateWordSheet: View{
     var body: some View{
         NavigationStack{
             Form{
-                TextField("Word", text: $word.word)
-                TextField("Description", text: $word.wordDescription)
-                TextField("Example", text: $word.example)
-            }  
+                Section(header: Text("Word Form")) {
+                    HStack {
+                        Text("Word")
+                        TextField("Enter Word", text: $word.word)
+                            .multilineTextAlignment(.trailing) // Align text field content to the left
+                    }
+                    
+                    HStack {
+                        Text("Description")
+                        TextField("Enter Description", text: $word.wordDescription)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    
+                    HStack {
+                        Text("Example")
+                        TextField("Enter Example", text: $word.example)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    
+                    HStack {
+                        Text("Date Added:")
+                        Spacer()
+                        Text(word.dateAdded)
+                            .multilineTextAlignment(.leading)
+                    }
+                }
+            }
             .navigationTitle("Update Word")
             .navigationBarTitleDisplayMode(.large)
             .toolbar{
@@ -253,20 +401,56 @@ struct seeWordsPage: View {
     @Query private var words: [Word]
     @Environment(\.modelContext) var context
     @State private var wordEdit: Word?
+    @State private var opacityRatio: Double = 1.0
+    
+    
+    let blue = Color(red: 0.04, green: 1.0, blue: 1.0)
+    let argentinianBlue = Color(red: 0.376, green: 0.686, blue: 1.0)
+    let deepSkyBlue = Color(red: 0.156, green: 0.76, blue: 1.0)
+    let aqua = Color(red: 0.164, green: 0.96, blue: 1.0)
+    let celeste = Color(red: 0.725, green: 0.98, blue: 0.97)
+    
     
     var body: some View {
+        let colorArray = [blue, argentinianBlue, deepSkyBlue, aqua, celeste]
         if (words.count != 0){
             NavigationStack {
                 List{
-                    ForEach(words){
-                        word in WordCell(word: word)
+                    Section() {
+                        Image("backgroundSee")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 350, height: 200, alignment: .center)
+                    }
+                    .listSectionSpacing(.compact)
+                    Section {
+                        HStack {
+                            Spacer()
+                            Text("Word")
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            Spacer()
+                            Text("Date")
+                                .frame(maxWidth: .infinity, alignment: .center)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: 5)
+                        .padding()
+                    }
+                    .listSectionSpacing(.compact)
+                    .listRowBackground(
+                        Capsule()
+                            .fill(.white)
+                            .frame(maxWidth: .infinity, maxHeight: 30)
+                            .padding()
+                    )
+                    ForEach(Array(words.enumerated()), id: \.offset) { index, word in WordCell(word: word)
                             .frame(maxWidth: .infinity, alignment: .center)
                             .onTapGesture {
                                 wordEdit = word
                             }
+                            .listRowSeparator(.hidden)
                             .listRowBackground(
                                 Capsule()
-                                    .fill(Color(white: 1, opacity: 0.8))
+                                    .fill(colorArray[index % 5])
                                     .padding(.vertical, 2)
                                     .padding(.horizontal, 20)
                             )
@@ -288,7 +472,7 @@ struct seeWordsPage: View {
         }
         else{
             VStack (spacing: 25){
-                Image(systemName: "text.append")
+                Image(systemName: "exclamationmark.circle")
                     .font(.system(size: 100))
                 Text("""
                     It seems like you haven't added any words yet.
@@ -306,13 +490,15 @@ struct seeWordsPage: View {
     
 
 struct addWordPage: View {
-    @Environment(\.modelContext) var context
+    @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     
     @State private var word: String = ""
     @State private var example: String = ""
     @State private var description: String = ""
     @State var validWord = true;
+    @State var validExample = true
+    @State var wordAdded = false
     
     let wordBack = Color(red: 0.81, green: 0.73, blue: 0.89)
     let exampleBack = Color(red: 0.83, green: 0.75, blue: 0.89)
@@ -383,7 +569,13 @@ struct addWordPage: View {
                     .font(.system(size: 30))
                     
                     Button("Submit Word") {
-                        considerWord(word: word)
+                        if (considerExample(word: word, example: example)){
+                            considerWord(word: word)
+                            validExample = true
+                        }
+                        else{
+                            validExample = false
+                        }
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(!isFormValid)
@@ -392,6 +584,13 @@ struct addWordPage: View {
                         The given word does not seem to be valid
                         Please check if you have typed it correctly and try again
                         """)
+                    Text(validExample ? "" : """
+                        The example does not utilize the word
+                        """)
+                    Text(wordAdded ? """
+                        The word was sucessufuly added!
+                        """ : "")
+                    .multilineTextAlignment(.center)
                 }
                 .offset(x: 20)
                 .padding(.trailing, 50)
@@ -401,8 +600,35 @@ struct addWordPage: View {
         }
     }
     
+    func considerExample(word: String, example: String) -> Bool{
+        return example.lowercased().contains(word.lowercased())
+    }
+    
     func considerWord(word: String){
-        print(isWordInFile(word:word.lowercased(), description:description, example:example))
+        isWordInFile(word:word.lowercased(), description:description, example:example)
+    }
+    
+    func formattedDateAmericanStyle(from date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        
+        // Get the month and year
+        dateFormatter.dateFormat = "MMMM" // Full month name
+        let month = dateFormatter.string(from: date)
+        
+        dateFormatter.dateFormat = "yyyy" // Full year
+        let year = dateFormatter.string(from: date)
+        
+        // Get the day and add the ordinal suffix
+        let day = Calendar.current.component(.day, from: date)
+        let ordinalSuffix = getOrdinalSuffix(for: day)
+        
+        return "\(month) \(day)\(ordinalSuffix), \(year)"
+    }
+
+    func getOrdinalSuffix(for day: Int) -> String {
+        let suffixes = ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"]
+        if (11...13).contains(day % 100) { return "th" } // Special case for 11th, 12th, 13th
+        return suffixes[day % 10]
     }
 
     func isWordInFile(word: String, description: String, example: String) -> Void {
@@ -421,16 +647,17 @@ struct addWordPage: View {
             // Searching for the word in the file content
             if fileContents.contains(word) {
                 print("The word '\(word)' was found in the file.")
-                let newWord = Word(wordInit: word.capitalized, exampleInit: example, descriptionInit: description) // Create object
+                let newWord = Word(wordInit: word.capitalized, exampleInit: example, descriptionInit: description, date:formattedDateAmericanStyle(from: Date.now)) // Create object
                 context.insert(newWord) // Insert object to context
+                wordAdded = true
                 do {
                     try context.save()
-                    print("Context saved successfully")
+                    print("SAVE")
                 }
                 catch {
-                    print("Error saving context: \(error.localizedDescription)")
+                    print("Error saving context: \(error)")
                 }
-                dismiss() // Dismiss context
+//                dismiss()  Dismiss context
                 print("The word was saved")
             }
             else {

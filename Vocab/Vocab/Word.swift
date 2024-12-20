@@ -9,15 +9,16 @@ import Foundation
 import SwiftData
 
 @Model
-class Word {
-    var word: String
+class Word{
+    @Attribute(.unique) var word: String
     var example: String
     var wordDescription: String
-
-
-    init(wordInit: String, exampleInit: String, descriptionInit: String) {
+    var dateAdded: String
+    
+    init(wordInit: String, exampleInit: String, descriptionInit: String, date: String) {
         self.word = wordInit
         self.example = exampleInit
         self.wordDescription = descriptionInit
+        self.dateAdded = date
     }
 }
