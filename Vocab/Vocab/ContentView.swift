@@ -4,6 +4,7 @@
 //
 //  Created by Bruno Gomes Pascotto on 12/17/24.
 //
+//.background(LinearGradient(gradient: Gradient(colors: [.white, .blue.opacity(0.2)]), startPoint: .top, endPoint: .bottom))
 
 import SwiftUI
 import Foundation
@@ -12,37 +13,51 @@ import UIKit
 
 struct ContentView: View {
     var body: some View {
-//        Image("backgroundSee")  // Replace with your image asset name
-//            .resizable()          // Make the image resizable
-//            .scaledToFill()       // Scale the image to fill the space
-//            .edgesIgnoringSafeArea(.all)  // Extend the image to cover the whole screen, ignoring safe areas
         NavigationView {
-            VStack{
-                Text("Menu")
-                    .font(Font.custom("Rockwell-Regular", size: 60, relativeTo: .title))
+            VStack {
+                // Title
+                Text("Vocab\nMain Page")
+                    .font(Font.custom("Rockwell-Regular", size: 50, relativeTo: .title))
+                    .padding()
+                    .foregroundColor(.white)
                     .background(
-                        Rectangle()
-                            .foregroundColor(.blue)
-                            .frame(width: 2000, height: 125)
-                            .offset(y: -30)
+                        LinearGradient(gradient: Gradient(colors: [.blue, .purple]), startPoint: .leading, endPoint: .trailing)
+                            .frame(height: 125)
                     )
+                    .cornerRadius(10)
+                    .shadow(color: .gray.opacity(0.5), radius: 10, x: 0, y: 5)
+                    .padding(.bottom, 20)
+                    .frame(alignment: .center)
+                    .multilineTextAlignment(.center)
+                
                 Spacer()
+                
+                // Buttons
                 VStack(spacing: 10){
                     HStack(spacing: 10){
-                        Image(systemName: "plus")
+                        Image(systemName: "plus.circle")
                             .font(.system(size: 30))
                             .foregroundColor(.blue)
-                        NavigationLink(destination: addWordPage()) {
+                        NavigationLink(destination: AddWordPage()) {
                             Text("Add Word")
                                 .font(.system(size: 30))
                         }
                     }
                     HStack(spacing: 10){
-                        Image(systemName: "pencil.and.list.clipboard")
+                        Image(systemName: "shuffle.circle")
                             .font(.system(size: 30))
                             .foregroundColor(.blue)
-                        NavigationLink(destination: quizPage()) {
+                        NavigationLink(destination: RandomWordPage()) {
                             Text("Add Random Word")
+                                .font(.system(size: 30))
+                        }
+                    }
+                    HStack(spacing: 10){
+                        Image(systemName: "rectangle.3.group.bubble")
+                            .font(.system(size: 30))
+                            .foregroundColor(.blue)
+                        NavigationLink(destination: WordGroups()) {
+                            Text("Collections")
                                 .font(.system(size: 30))
                         }
                     }
@@ -50,205 +65,41 @@ struct ContentView: View {
                         Image(systemName: "magazine")
                             .font(.system(size: 30))
                             .foregroundColor(.blue)
-                        NavigationLink(destination: seeWordsPage()) {
+                        NavigationLink(destination: SeeWordsPage()) {
                             Text("See Words")
                                 .font(.system(size: 30))
                         }
                     }
                 }
+                
                 Spacer()
-                HStack(spacing: 40){
+                
+                // Footer Bar
+                HStack {
                     NavigationLink(destination: profilePage()) {
                         Image(systemName: "person.circle.fill")
                             .font(.system(size: 35))
                             .foregroundColor(.blue)
+                            .padding()
                     }
                 }
-                Spacer()
+                .frame(maxWidth: .infinity)
+                .background(Color(.systemGray6))
+                .shadow(color: .gray.opacity(0.5), radius: 5, x: 0, y: -2)
             }
+            .background(LinearGradient(gradient: Gradient(colors: [.white, .blue.opacity(0.2)]), startPoint: .top, endPoint: .bottom))
         }
     }
+
 }
 
-struct profilePage: View {
-    @Query private var words: [Word]
-    
-    var body: some View {
-        Text("So far, you have added")
-            .font(.system(size: 20))
-        Text(String(words.count))
-            .font(.system(size: 40))
-        Text(words.count == 1 ? "word" : "words")
-            .font(.system(size: 20))
-    }
+protocol getAmericanDate{
+    func formattedDateAmericanStyle(from date: Date) -> String
+
+    func getOrdinalSuffix(for day: Int) -> String
 }
 
-struct quizPage: View {
-    
-    @Environment(\.modelContext) private var context
-    @Environment(\.dismiss) private var dismiss
-    
-    @State var newWord: String = ""
-    @State var newDefinition: String = ""
-    @State var newExample: String = ""
-    @State var wordOpacity = 1.0
-    
-    @State var validExample = true
-    @State var wordAdded = false
-    @State var validWord = false
-    @State var randomWordColor: Color = .blue
-    
-    let blue = Color(red: 0.04, green: 0.0, blue: 1.0)
-    let argentinianBlue = Color(red: 0.376, green: 0.686, blue: 1.0)
-    let deepSkyBlue = Color(red: 0.156, green: 0.76, blue: 1.0)
-    let aqua = Color(red: 0.164, green: 0.96, blue: 1.0)
-    let celeste = Color(red: 0.725, green: 0.98, blue: 0.97)
-
-    var body: some View {
-        let colorArray = [blue, argentinianBlue, deepSkyBlue, aqua, celeste]
-        
-        ZStack{
-            GeometryReader { geometry in
-                Circle()
-                    .offset(x: -300, y: -400)
-                    .frame(width: 1000, height: 820)
-                    .foregroundColor(celeste)
-            }
-            .edgesIgnoringSafeArea(.all)
-            .offset(y: -150)
-            VStack(spacing: 20){
-                Text("Random Word")
-                    .font(.system(size: 50))
-                Spacer()
-                
-                Text("""
-                    In here, you will get a random word. You should provide an example and a description for it.
-                    Press "New Word" to start and to change the word provided.
-                    """)
-                    .font(.system(size: 25))
-                    .foregroundColor(.black)
-                    .multilineTextAlignment(.center)
-                    .frame(width: 350)
-                    .offset(y: -150)
-                Spacer()
-                Button("New Word"){
-                    updateWord(colorArray: colorArray)
-                }
-                .buttonStyle(.bordered)
-                .foregroundColor(.black)
-                Spacer()
-                Button("Submit Word") {
-                    if (considerExample(word: newWord, example: newExample)){
-                        validExample = true
-                        wordAdded = true
-                        let newWord = Word(wordInit: newWord.capitalized, exampleInit: newExample, descriptionInit: newDefinition, date:formattedDateAmericanStyle(from: Date.now)) // Create object
-                        context.insert(newWord) // Insert object to context
-                        wordAdded = true
-                        do {
-                            try context.save()
-                            print("SAVE")
-                        }
-                        catch {
-                            print("Error saving context: \(error)")
-                        }
-        //                dismiss()  Dismiss context
-                        print("The word was saved")
-                        updateWord(colorArray: colorArray)
-                    }
-                    else{
-                        validExample = false
-                    }
-                }
-            }
-            Spacer()
-            VStack(spacing: 20){
-                Text(newWord)
-                    .font(.system(size: 40))
-                    .foregroundColor(randomWordColor)
-                    .offset(y: -10)
-                    .opacity(wordOpacity) // Bind opacity to the state variable
-//                TextField(
-//                    "Example",
-//                    text: $newExample
-//                )
-//                .background(
-//                    Rectangle()
-//                        .foregroundColor(aqua)
-//                        .frame(height: 50)
-//                )
-//                .font(.system(size: 30))
-//                
-//                TextField(
-//                    "Description",
-//                    text: $newDefinition
-//                )
-//                .font(.system(size: 30))
-//                .background(
-//                    Rectangle()
-//                        .foregroundColor(.yellow)
-//                        .frame(height: 50)
-//                )
-//                TextField(
-//                    "Word",
-//                    text: $newExample
-//                )
-//                .background(
-//                    Rectangle()
-//                        .foregroundColor(.green)
-//                        .frame(height: 50)
-////                        .offset(x: -50)
-//                )
-//                .font(.system(size: 30))
-                
-                TextField(
-                    "Example",
-                    text: $newExample
-                )
-                .padding()
-                .offset(x: 50)
-                .cornerRadius(10)
-                .background(
-                    Rectangle()
-                        .foregroundColor(.blue)
-                        .frame(height: 50)
-//                        .offset(x: -50)
-                )
-                .font(.system(size: 30))
-                
-                TextField(
-                    "Description",
-                    text: $newDefinition
-                )
-                .padding()
-                .offset(x: 50)
-                .cornerRadius(10)
-                .background(
-                    Rectangle()
-                        .foregroundColor(.orange)
-                        .frame(height: 50)
-                )
-                .font(.system(size: 30))
-                
-                
-                Text(validExample ? "" : """
-                    The example does not utilize the word
-                    """)
-                .frame(width: validExample ? 0 : 500)
-                .frame(height: validExample ? 0 : 50)
-                
-                Text(wordAdded ? """
-                    The word was sucessufuly added!
-                    """ : "")
-                .frame(width: wordAdded ? 0 : 500)
-                .frame(height: validExample ? 0 : 50)
-            }
-        }
-    }
-    
-    func considerExample(word: String, example: String) -> Bool{
-        return example.lowercased().contains(word.lowercased())
-    }
-    
+extension getAmericanDate{
     func formattedDateAmericanStyle(from date: Date) -> String {
         let dateFormatter = DateFormatter()
         
@@ -270,6 +121,318 @@ struct quizPage: View {
         let suffixes = ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"]
         if (11...13).contains(day % 100) { return "th" } // Special case for 11th, 12th, 13th
         return suffixes[day % 10]
+    }
+}
+
+struct StatisticCard: View {
+    let title: String
+    let value: String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.headline)
+                .foregroundColor(.primary)
+            
+            Text(value)
+                .font(.title2)
+                .bold()
+                .foregroundColor(.blue)
+            
+            Divider()
+                .background(Color.gray.opacity(0.3))
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: Color.gray.opacity(0.2), radius: 5, x: 0, y: 4)
+    }
+}
+
+struct profilePage: View {
+    @Query private var words: [Word]
+    @State private var longestStreak: Int = 0
+    @State private var averagePerDay: Double = 0
+    
+    @State private var addedWords: Int = 0
+    @State private var randomWords: Int = 0
+    @State private var collectionsExplored: Int = 0
+    
+    var body: some View {
+        VStack{
+            ScrollView{
+                StatisticCard(title: "Total words learned", value: words.count == 1 ? "\(words.count) word" : "\(words.count) words")
+                StatisticCard(title: "Most words in one day", value: "\(longestStreak)")
+                StatisticCard(title: "You average", value: "\(averagePerDay) words/day")
+                StatisticCard(title: "You have added", value: addedWords == 1 ? "\(addedWords) word" : "\(addedWords) words")
+                StatisticCard(title: "You learned", value: randomWords == 1 ? "\(randomWords) random word" : "\(randomWords) random words")
+                StatisticCard(title: "You have explored", value: collectionsExplored == 1 ? "\(collectionsExplored) collection" : "\(collectionsExplored) collections")
+            }
+        }
+        .onAppear {
+            getLongestStreak()
+        }
+    }
+    
+    func getLongestStreak() -> Void{
+        var max: Int = 0
+        var dateFrequency: [String: Int] = [:]
+        var collectionNames: [String] = []
+
+        for word in words {
+            if dateFrequency.keys.contains(word.dateAdded){
+                dateFrequency[word.dateAdded]! += 1
+            }
+            else{
+                dateFrequency[word.dateAdded] = 1
+            }
+            
+            if (word.source == "Added"){
+                self.addedWords += 1
+            }
+            else if (word.source == "Random"){
+                self.randomWords += 1
+            }
+            else{
+                if (!collectionNames.contains(word.source)){
+                    collectionNames.append(word.source)
+                    self.collectionsExplored += 1
+                }
+            }
+        }
+        
+        for (_, value) in dateFrequency{
+            if (value >= max){
+                max = value
+            }
+        }
+        longestStreak = max
+        averagePerDay = Double(words.count/dateFrequency.keys.count)
+    }
+}
+
+struct ImageCard: View {
+    let image: Image
+    let description: String
+    let totalAmount: String
+    
+    var body: some View {
+        VStack {
+            image
+                .resizable()
+                .scaledToFit()
+                .frame(height: 100) // Adjust size as needed
+                .clipShape(Rectangle()) // Optional styling
+                .shadow(radius: 5)  // Optional styling
+                .padding(.bottom, 10)
+            
+            Text(description)
+                .font(.system(size: 12))
+                .multilineTextAlignment(.center)
+                .foregroundColor(.black)
+                .padding(.horizontal)
+            
+            Text(totalAmount)
+                .font(.system(size: 12))
+                .multilineTextAlignment(.center)
+                .foregroundColor(.black)
+                .padding(.horizontal)
+        }
+        .frame(width: 250, height: 200) // Adjust card size as needed
+        .background(Color.white)
+        .cornerRadius(15)
+        .shadow(color: .gray.opacity(0.4), radius: 8, x: 0, y: 4)
+    }
+}
+
+
+struct WordGroups: View{
+    var body: some View {
+        ScrollView{
+            VStack{
+                NavigationLink(destination: CollectionPage(title: "Hundred")) {
+                    ImageCard(
+                        image: Image(systemName: "book.pages"),
+                        description: "100 Most Used Nouns",
+                        totalAmount: "(100 words)"
+                    )
+                }
+                NavigationLink(destination: CollectionPage(title: "Time")) {
+                    ImageCard(
+                        image: Image(systemName: "timer"),
+                        description: "Words for time",
+                        totalAmount: "(21 words)"
+                    )
+                }
+                NavigationLink(destination: CollectionPage(title: "Technology")) {
+                    ImageCard(
+                        image: Image(systemName: "network"),
+                        description: "Words associated with technology",
+                        totalAmount: "(19 words)"
+                    )
+                }
+                NavigationLink(destination: CollectionPage(title: "Places")) {
+                    ImageCard(
+                        image: Image(systemName: "map"),
+                        description: "Words for places in a city",
+                        totalAmount: "(19 words)"
+                    )
+                }
+                NavigationLink(destination: CollectionPage(title: "Pronouns")) {
+                    ImageCard(
+                        image: Image(systemName: "figure.wave"),
+                        description: "Pronouns in the English Language",
+                        totalAmount: "(39 words)"
+                    )
+                }
+                NavigationLink(destination: CollectionPage(title: "Emotions")) {
+                    ImageCard(
+                        image: Image(systemName: "person.3.fill"),
+                        description: "Emotions",
+                        totalAmount: "(22 words)"
+                    )
+                }
+            }
+        }
+    }
+}
+
+struct RandomWordPage: View, getAmericanDate{
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
+    
+    @State var newWord: String = ""
+    @State var newDefinition: String = ""
+    @State var newExample: String = ""
+    @State var wordOpacity = 1.0
+    
+    @State var validExample = true
+    @State var wordAdded = false
+    @State var validWord = false
+    @State var randomWordColor: Color = .blue
+    
+    let blue = Color(red: 0.04, green: 0.0, blue: 1.0)
+    let argentinianBlue = Color(red: 0.376, green: 0.686, blue: 1.0)
+    let deepSkyBlue = Color(red: 0.156, green: 0.76, blue: 1.0)
+    let aqua = Color(red: 0.19, green: 0.96, blue: 1.0)
+    let celeste = Color(red: 0.08, green: 0.298, blue: 0.47)
+
+    var body: some View {
+        let colorArray = [blue, argentinianBlue, deepSkyBlue, aqua, celeste]
+        
+        ZStack{
+            GeometryReader { geometry in
+                Circle()
+                    .offset(x: -300, y: -400)
+                    .frame(width: 1000, height: 820)
+                    .foregroundColor(Color(red: 0.949, green: 0.950, blue: 0.85))
+            }
+            .edgesIgnoringSafeArea(.all)
+            .offset(y: -150)
+            
+            VStack(spacing: 20) {
+                Text("Random Word")
+                    .font(.system(size: 50))
+                Spacer()
+                
+                Text("""
+                    In here, you will get a random word. You should provide an example and a description for it.
+                    Press "New Word" to start and to change the word provided.
+                    """)
+                    .font(.system(size: 25))
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                    .frame(width: 350)
+                    .offset(y: -150)
+                Spacer()
+                
+                Button("New Word") {
+                    updateWord(colorArray: colorArray)
+                }
+                .buttonStyle(.bordered)
+                .foregroundColor(.black)
+                
+                Spacer()
+                
+                Button("Submit Word") {
+                    if (considerExample(word: newWord, example: newExample)) {
+                        validExample = true
+                        wordAdded = true
+                        let newWord = Word(wordInit: newWord.capitalized, exampleInit: newExample, descriptionInit: newDefinition, date: formattedDateAmericanStyle(from: Date.now), source: "Random") // Create object
+                        context.insert(newWord) // Insert object to context
+                        wordAdded = true
+                        
+                        do {
+                            try context.save()
+                            print("SAVE")
+                        }
+                        catch {
+                            print("Error saving context: \(error)")
+                        }
+                        
+                        print("The word was saved")
+                        updateWord(colorArray: colorArray)
+                    }
+                    else {
+                        validExample = false
+                    }
+                }
+            }
+            
+            Spacer()
+            
+            VStack(spacing: -10) {
+                Text(newWord.capitalized)
+                    .font(.system(size: 40))
+                    .foregroundColor(randomWordColor)
+                    .offset(y: -10)
+                    .opacity(wordOpacity) // Bind opacity to the state variable
+                    .underline(true)
+                
+                // Example TextField
+                TextField("Example", text: $newExample)
+                    .padding()
+                    .disableAutocorrection(true)
+                    .background(
+                        Rectangle()
+                            .foregroundColor(.blue)
+                            .frame(height: 50)
+                            .cornerRadius(10)
+                    )
+                    .font(.system(size: 30))
+                    .offset(x: 50)
+                
+                // Description TextField
+                TextField("Description", text: $newDefinition)
+                    .padding()
+                    .disableAutocorrection(true)
+                    .background(
+                        Rectangle()
+                            .foregroundColor(.orange)
+                            .frame(height: 50)
+                            .cornerRadius(10)
+                    )
+                    .font(.system(size: 30))
+                    .offset(x: 50)
+                
+                Text(validExample ? "" : """
+                    The example does not utilize the word
+                    """)
+                .frame(width: 500)
+                .frame(height: 50)
+                
+                Text(wordAdded ? """
+                    The word was successfully added!
+                    """ : "")
+                .frame(width: 500)
+                .frame(height: 50)
+            }
+        }
+    }
+
+    func considerExample(word: String, example: String) -> Bool{
+        return example.lowercased().contains(word.lowercased())
     }
 
     func updateWord(colorArray : [Color]) {
@@ -318,7 +481,8 @@ struct quizPage: View {
             }
             
             return randomWord
-        } catch {
+        }
+        catch {
             // Handle any errors that might occur while reading the file
             print("Error reading file: \(error.localizedDescription)")
         }
@@ -356,19 +520,21 @@ struct UpdateWordSheet: View{
             Form{
                 Section(header: Text("Word Form")) {
                     HStack {
-                        Text("Word")
-                        TextField("Enter Word", text: $word.word)
-                            .multilineTextAlignment(.trailing) // Align text field content to the left
+                        Text("Word:")
+                        Spacer()
+                        Text(word.word)
+                            .multilineTextAlignment(.leading)
+                            .foregroundStyle(.blue)
                     }
                     
                     HStack {
-                        Text("Description")
+                        Text("Description:")
                         TextField("Enter Description", text: $word.wordDescription)
                             .multilineTextAlignment(.trailing)
                     }
                     
                     HStack {
-                        Text("Example")
+                        Text("Example:")
                         TextField("Enter Example", text: $word.example)
                             .multilineTextAlignment(.trailing)
                     }
@@ -378,7 +544,17 @@ struct UpdateWordSheet: View{
                         Spacer()
                         Text(word.dateAdded)
                             .multilineTextAlignment(.leading)
+                            .foregroundStyle(.gray)
                     }
+                    
+                    HStack {
+                        Text("From:")
+                        Spacer()
+                        Text(word.source)
+                            .multilineTextAlignment(.leading)
+                            .foregroundStyle(.gray)
+                    }
+                    
                 }
             }
             .navigationTitle("Update Word")
@@ -397,22 +573,14 @@ struct UpdateWordSheet: View{
     
 }
 
-struct seeWordsPage: View {
+struct SeeWordsPage: View {
     @Query private var words: [Word]
     @Environment(\.modelContext) var context
     @State private var wordEdit: Word?
     @State private var opacityRatio: Double = 1.0
-    
-    
-    let blue = Color(red: 0.04, green: 1.0, blue: 1.0)
-    let argentinianBlue = Color(red: 0.376, green: 0.686, blue: 1.0)
-    let deepSkyBlue = Color(red: 0.156, green: 0.76, blue: 1.0)
-    let aqua = Color(red: 0.164, green: 0.96, blue: 1.0)
-    let celeste = Color(red: 0.725, green: 0.98, blue: 0.97)
-    
+    @State private var typeColor: Color = .blue
     
     var body: some View {
-        let colorArray = [blue, argentinianBlue, deepSkyBlue, aqua, celeste]
         if (words.count != 0){
             NavigationStack {
                 List{
@@ -442,7 +610,9 @@ struct seeWordsPage: View {
                             .frame(maxWidth: .infinity, maxHeight: 30)
                             .padding()
                     )
-                    ForEach(Array(words.enumerated()), id: \.offset) { index, word in WordCell(word: word)
+                    ForEach(Array(words.enumerated()), id: \.offset) { index, word in
+                        let typeColor = setColor(source: word.source)
+                        WordCell(word: word)
                             .frame(maxWidth: .infinity, alignment: .center)
                             .onTapGesture {
                                 wordEdit = word
@@ -450,7 +620,7 @@ struct seeWordsPage: View {
                             .listRowSeparator(.hidden)
                             .listRowBackground(
                                 Capsule()
-                                    .fill(colorArray[index % 5])
+                                    .fill(typeColor)
                                     .padding(.vertical, 2)
                                     .padding(.horizontal, 20)
                             )
@@ -486,10 +656,261 @@ struct seeWordsPage: View {
             }
         }
     }
+    
+    func setColor(source: String) -> Color{
+        
+//        let blue = Color(red: 0.04, green: 1.0, blue: 1.0)
+        let argentinianBlue = Color(red: 0.376, green: 0.686, blue: 1.0)
+        let deepSkyBlue = Color(red: 0.156, green: 0.76, blue: 1.0)
+//        let aqua = Color(red: 0.164, green: 0.96, blue: 1.0)
+        let celeste = Color(red: 0.725, green: 0.98, blue: 0.97)
+        
+        if (source == "Added"){
+            return argentinianBlue
+        }
+        else if (source == "Random"){
+            return deepSkyBlue
+        }
+        else{
+            return celeste
+        }
+    }
 }
+
+struct Collection: Codable {
+    let title: String
+    let description: String
+    let wordSet: [String]
+}
+
+struct CollectionPage: View, getAmericanDate {
+    @Query private var words: [Word]
+    
+    @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var collection: Collection?
+    @State var definition: String = ""
+    @State var title: String = ""
+    
+    @State private var newWords: [String] = []
+    @State private var currentWord: String = ""
+    @State private var wordOpacity = 1.0
+    
+    @State private var example: String = ""
+    @State private var description: String = ""
+    @State private var validWord = true
+    @State private var validExample = true
+    @State private var wordAdded = false
     
 
-struct addWordPage: View {
+    var body: some View {
+        ZStack {
+            GeometryReader { _ in
+                Circle()
+                    .offset(x: -200, y: -300)
+                    .frame(width: 900, height: 740)
+                    .foregroundColor(Color.purple.opacity(0.2))
+            }
+            .edgesIgnoringSafeArea(.all)
+            if (currentWord == "No more words"){
+                VStack (spacing: 25){
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.system(size: 100))
+                    Text("""
+                        You have learned all words from this collection
+                        Congratulations!
+                        """)
+                        .font(.system(size: 25))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.trailing, 20)
+                        .offset(x: 10)
+                }
+            }
+            else if (!currentWord.isEmpty) {
+                VStack {
+                    // Title and descriptive text
+                    Text(title)
+                        .font(.system(size: 60, weight: .bold, design: .rounded))
+                        .foregroundColor(.purple)
+                    
+                    Text(definition)
+                        .font(.system(size: 28))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                    
+                    Text("Be sure to add an example and description for every word.")
+                        .font(.system(size: 24))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 30)
+                    
+                    Spacer()
+                    
+                    // Form Section
+                    VStack(spacing: 25) {
+                        // Word display
+                        Text(currentWord)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.blue.opacity(0.1))
+                                    .frame(height: 55)
+                            )
+                            .font(.system(size: 32))
+                            .padding(.horizontal, 20)
+                        
+                        // Example input
+                        TextField("Example", text: $example)
+                            .disableAutocorrection(true)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.green.opacity(0.1))
+                                    .frame(height: 55)
+                            )
+                            .font(.system(size: 32))
+                            .padding(.horizontal, 20)
+                        
+                        // Description input
+                        TextField("Description", text: $description)
+                            .disableAutocorrection(true)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.orange.opacity(0.1))
+                                    .frame(height: 55)
+                            )
+                            .font(.system(size: 32))
+                            .padding(.horizontal, 20)
+                        
+                        // Submit Button
+                        Button("Submit Word") {
+                            handleWordSubmission()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(!isFormValid)
+                        
+                        // Messages
+                        if !validWord {
+                            Text("The given word does not seem to be valid. Please check and try again.")
+                                .foregroundColor(.red)
+                                .multilineTextAlignment(.center)
+                        }
+                        
+                        if !validExample {
+                            Text("The example does not utilize the word.")
+                                .foregroundColor(.red)
+                                .multilineTextAlignment(.center)
+                        }
+                        
+                        if wordAdded {
+                            Text("The word was successfully added!")
+                                .foregroundColor(.green)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    .padding(.horizontal, 45)
+                    
+                    Spacer()
+                }
+            }
+            else {
+                // Loading State
+                VStack {
+                    Text("Loading...")
+                        .font(.system(size: 24))
+                        .foregroundColor(.gray)
+                    Spacer()
+                }
+            }
+        }
+        .onAppear {
+            initializeWords()
+        }
+    }
+
+    func considerExample(word: String, example: String) -> Bool{
+        return example.lowercased().contains(word.lowercased())
+    }
+    
+    func getWords(collectionName: String){
+            guard let path = Bundle.main.path(forResource: "Collections", ofType: "json") else{
+                return
+            }
+            let url = URL(fileURLWithPath: path)
+            do{
+                let jsonData = try Data(contentsOf: url)
+                let decodedData = try JSONDecoder().decode([String: Collection].self, from: jsonData)
+                if let collection = decodedData[collectionName] {
+                    self.collection = collection
+                    self.title = collection.title
+                    self.definition = collection.description
+                }
+                else {
+                    print("Collection with name \(collectionName) not found.")
+                }
+            }
+            catch{
+                print("Error: \(error)")
+            }
+        }
+
+    // Ensure form is valid
+    private var isFormValid: Bool {
+        !example.isEmpty && !description.isEmpty
+    }
+
+    // Initialize words and the first word
+    private func initializeWords() {
+        getWords(collectionName: title)
+        updateWordList()
+    }
+
+    // Fetch and update word list
+    private func updateWordList() {
+        let existingWords = Set(words.map { $0.word })
+        newWords = collection?.wordSet.filter { !existingWords.contains($0) } ?? []
+        currentWord = newWords.first ?? "No more words"
+    }
+
+    // Handle word submission
+    private func handleWordSubmission() {
+        guard !currentWord.isEmpty, considerExample(word: currentWord, example: example) else {
+            validExample = false
+            return
+        }
+        
+        validExample = true
+        let newWord = Word(
+            wordInit: currentWord.capitalized,
+            exampleInit: example,
+            descriptionInit: description,
+            date: formattedDateAmericanStyle(from: Date()),
+            source: self.title
+        )
+        
+        context.insert(newWord)
+        
+        do {
+            try context.save()
+            wordAdded = true
+            updateNextWord()
+        } catch {
+            print("Error saving context: \(error)")
+        }
+    }
+
+    // Update to the next word
+    private func updateNextWord() {
+        newWords.removeFirst()
+        currentWord = newWords.first ?? "No more words"
+    }
+}
+
+
+struct AddWordPage: View, getAmericanDate {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     
@@ -536,6 +957,7 @@ struct addWordPage: View {
                         "Word",
                         text: $word
                     )
+                    .disableAutocorrection(true)
                     .background(
                         Rectangle()
                             .foregroundColor(wordBack)
@@ -548,6 +970,7 @@ struct addWordPage: View {
                         "Example",
                         text: $example
                     )
+                    .disableAutocorrection(true)
                     .background(
                         Rectangle()
                             .foregroundColor(exampleBack)
@@ -560,6 +983,7 @@ struct addWordPage: View {
                         "Description",
                         text: $description
                     )
+                    .disableAutocorrection(true)
                     .background(
                         Rectangle()
                             .foregroundColor(descriptionBack)
@@ -607,29 +1031,6 @@ struct addWordPage: View {
     func considerWord(word: String){
         isWordInFile(word:word.lowercased(), description:description, example:example)
     }
-    
-    func formattedDateAmericanStyle(from date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        
-        // Get the month and year
-        dateFormatter.dateFormat = "MMMM" // Full month name
-        let month = dateFormatter.string(from: date)
-        
-        dateFormatter.dateFormat = "yyyy" // Full year
-        let year = dateFormatter.string(from: date)
-        
-        // Get the day and add the ordinal suffix
-        let day = Calendar.current.component(.day, from: date)
-        let ordinalSuffix = getOrdinalSuffix(for: day)
-        
-        return "\(month) \(day)\(ordinalSuffix), \(year)"
-    }
-
-    func getOrdinalSuffix(for day: Int) -> String {
-        let suffixes = ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"]
-        if (11...13).contains(day % 100) { return "th" } // Special case for 11th, 12th, 13th
-        return suffixes[day % 10]
-    }
 
     func isWordInFile(word: String, description: String, example: String) -> Void {
         let fileName = "words_alpha"
@@ -647,7 +1048,7 @@ struct addWordPage: View {
             // Searching for the word in the file content
             if fileContents.contains(word) {
                 print("The word '\(word)' was found in the file.")
-                let newWord = Word(wordInit: word.capitalized, exampleInit: example, descriptionInit: description, date:formattedDateAmericanStyle(from: Date.now)) // Create object
+                let newWord = Word(wordInit: word.capitalized, exampleInit: example, descriptionInit: description, date:formattedDateAmericanStyle(from: Date.now), source: "Added") // Create object
                 context.insert(newWord) // Insert object to context
                 wordAdded = true
                 do {
@@ -663,6 +1064,7 @@ struct addWordPage: View {
             else {
                 print("The word '\(word)' was NOT found in the file.")
                 validWord = false
+                wordAdded = false
             }
         }
         catch {
