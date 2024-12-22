@@ -11,3 +11,6 @@ Vocab is a simple app to help you keep track of you English vocabulary
 
 # Availability
 The app is only available through the App Store for iOS 17.0+ devices
+
+# Video
+The following video shows the app being simulated in an Iphone 16. The video opens the app, and added a word through the Add Word page
