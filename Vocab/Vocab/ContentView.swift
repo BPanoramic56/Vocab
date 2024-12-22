@@ -4,93 +4,122 @@
 //
 //  Created by Bruno Gomes Pascotto on 12/17/24.
 //
-//.background(LinearGradient(gradient: Gradient(colors: [.white, .blue.opacity(0.2)]), startPoint: .top, endPoint: .bottom))
 
 import SwiftUI
 import Foundation
 import SwiftData
-import UIKit
 
 struct ContentView: View {
+    @State var backgroundImage: String? = "Utah1"
+    
+//    let iconBlue = Color(red: 0.04, green: 0.0, blue: 1.0)
+    let iconBlue = Color(red: 0.0, green: 0.909, blue: 1.0)
+    
     var body: some View {
         NavigationView {
-            VStack {
-                // Title
-                Text("Vocab\nMain Page")
-                    .font(Font.custom("Rockwell-Regular", size: 50, relativeTo: .title))
-                    .padding()
-                    .foregroundColor(.white)
+            ZStack {
+                // Background Image
+                Image(backgroundImage!)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .ignoresSafeArea() // Ensures it covers the entire screen
+                
+                // Content
+                VStack {
+                    // Title
+                    Text("Vocab\nMain Page")
+                        .font(Font.custom("Rockwell-Regular", size: 50, relativeTo: .title))
+                        .padding()
+                        .foregroundColor(.white)
+                        .background(.clear)
+                        .cornerRadius(10)
+                        .shadow(color: .gray.opacity(0.5), radius: 10, x: 0, y: 5)
+                        .padding(.bottom, 20)
+                        .frame(alignment: .center)
+                        .multilineTextAlignment(.center)
+                    
+                    Spacer()
+                    
+                    // Buttons
+                    VStack(spacing: 20) { // Adjust spacing for better layout
+                        HStack(spacing: 10) {
+                            Image(systemName: "plus.circle")
+                                .font(.system(size: 30))
+                                .foregroundColor(iconBlue)
+                            NavigationLink(destination: AddWordPage()) {
+                                Text("Add Word")
+                                    .font(.system(size: 30))
+                                    .foregroundStyle(iconBlue)
+                            }
+                        }
+                        HStack(spacing: 10) {
+                            Image(systemName: "shuffle.circle")
+                                .font(.system(size: 30))
+                                .foregroundColor(iconBlue)
+                            NavigationLink(destination: RandomWordPage()) {
+                                Text("Add Random Word")
+                                    .font(.system(size: 30))
+                                    .foregroundStyle(iconBlue)
+                            }
+                        }
+                        HStack(spacing: 10) {
+                            Image(systemName: "rectangle.3.group.bubble")
+                                .font(.system(size: 30))
+                                .foregroundColor(iconBlue)
+                            NavigationLink(destination: WordGroups()) {
+                                Text("Collections")
+                                    .font(.system(size: 30))
+                                    .foregroundStyle(iconBlue)
+                            }
+                        }
+                        HStack(spacing: 10) {
+                            Image(systemName: "magazine")
+                                .font(.system(size: 30))
+                                .foregroundColor(iconBlue)
+                            NavigationLink(destination: SeeWordsPage()) {
+                                Text("See Words")
+                                    .font(.system(size: 30))
+                                    .foregroundStyle(iconBlue)
+                            }
+                        }
+                    }
+                    .padding() // Add padding inside the background
                     .background(
-                        LinearGradient(gradient: Gradient(colors: [.blue, .purple]), startPoint: .leading, endPoint: .trailing)
-                            .frame(height: 125)
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color.gray.opacity(0.8), Color.black.opacity(0.4)]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .shadow(color: Color.gray.opacity(0.4), radius: 10, x: 0, y: 5) // Add shadow
                     )
-                    .cornerRadius(10)
-                    .shadow(color: .gray.opacity(0.5), radius: 10, x: 0, y: 5)
-                    .padding(.bottom, 20)
-                    .frame(alignment: .center)
-                    .multilineTextAlignment(.center)
-                
-                Spacer()
-                
-                // Buttons
-                VStack(spacing: 10){
-                    HStack(spacing: 10){
-                        Image(systemName: "plus.circle")
-                            .font(.system(size: 30))
-                            .foregroundColor(.blue)
-                        NavigationLink(destination: AddWordPage()) {
-                            Text("Add Word")
-                                .font(.system(size: 30))
+                    .padding(.horizontal) // Add space outside the background
+
+                    
+                    Spacer()
+                    
+                    // Footer Bar
+                    HStack {
+                        NavigationLink(destination: ProfilePage()) {
+                            Image(systemName: "person.circle.fill")
+                                .font(.system(size: 35))
+                                .foregroundColor(iconBlue)
+                                .padding()
                         }
                     }
-                    HStack(spacing: 10){
-                        Image(systemName: "shuffle.circle")
-                            .font(.system(size: 30))
-                            .foregroundColor(.blue)
-                        NavigationLink(destination: RandomWordPage()) {
-                            Text("Add Random Word")
-                                .font(.system(size: 30))
-                        }
-                    }
-                    HStack(spacing: 10){
-                        Image(systemName: "rectangle.3.group.bubble")
-                            .font(.system(size: 30))
-                            .foregroundColor(.blue)
-                        NavigationLink(destination: WordGroups()) {
-                            Text("Collections")
-                                .font(.system(size: 30))
-                        }
-                    }
-                    HStack(spacing: 10){
-                        Image(systemName: "magazine")
-                            .font(.system(size: 30))
-                            .foregroundColor(.blue)
-                        NavigationLink(destination: SeeWordsPage()) {
-                            Text("See Words")
-                                .font(.system(size: 30))
-                        }
-                    }
+                    .frame(maxWidth: .infinity)
+                    .background(Color(.clear))
+                    .shadow(color: .gray.opacity(0.5), radius: 5, x: 0, y: -2)
                 }
-                
-                Spacer()
-                
-                // Footer Bar
-                HStack {
-                    NavigationLink(destination: profilePage()) {
-                        Image(systemName: "person.circle.fill")
-                            .font(.system(size: 35))
-                            .foregroundColor(.blue)
-                            .padding()
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .background(Color(.systemGray6))
-                .shadow(color: .gray.opacity(0.5), radius: 5, x: 0, y: -2)
+                .padding() // Add padding to ensure content doesn't touch edges
             }
-            .background(LinearGradient(gradient: Gradient(colors: [.white, .blue.opacity(0.2)]), startPoint: .top, endPoint: .bottom))
+        }
+        .onAppear(){
+            self.backgroundImage = ["Utah1", "Utah2", "Utah3", "ParkCity1", "ParkCity2", "Timpanogos1", "Timpanogos2", "LCC1"].randomElement()
         }
     }
-
 }
 
 protocol getAmericanDate{
@@ -124,6 +153,39 @@ extension getAmericanDate{
     }
 }
 
+protocol getColorForCollection{
+    func decideBackgroundColor(sectionName: String) -> Color
+}
+
+extension getColorForCollection{
+    func decideBackgroundColor(sectionName: String) -> Color{
+        if (sectionName == "Hundred" || sectionName == "Time"){
+            return Color(red: 0.376, green: 0.662, blue: 0.478).opacity(0.2)
+        }
+        else if (sectionName == "Places" || sectionName == "Technology"){
+            return Color(red: 0.654, green: 0.678, blue: 0.776).opacity(0.2)
+        }
+        else if (sectionName == "Pronouns" || sectionName == "Emotions"){
+            return Color(red: 0.721, green: 0.545, blue: 0.290).opacity(0.2)
+        }
+        else if (sectionName == "Science" || sectionName == "Travel"){
+            return Color(red: 0.690, green: 0.843, blue: 1.0).opacity(0.2)
+        }
+        else if (sectionName == "Literature" || sectionName == "Health"){
+            return Color(red: 0.639, green: 0.086, blue: 0.129).opacity(0.2)
+        }
+        else if (sectionName == "Business" || sectionName == "Professions"){
+            return Color(red: 0.031, green: 0.498, blue: 0.549).opacity(0.3)
+        }
+        else if (sectionName == "TOEFL"){
+            return Color(red: 0.603, green: 0.600, blue: 0.772).opacity(0.2)
+        }
+        else{
+            return Color.purple.opacity(0.2)
+        }
+    }
+}
+
 struct StatisticCard: View {
     let title: String
     let value: String
@@ -150,7 +212,7 @@ struct StatisticCard: View {
     }
 }
 
-struct profilePage: View {
+struct ProfilePage: View {
     @Query private var words: [Word]
     @State private var longestStreak: Int = 0
     @State private var averagePerDay: Double = 0
@@ -207,8 +269,12 @@ struct profilePage: View {
                 max = value
             }
         }
-        longestStreak = max
-        averagePerDay = Double(words.count/dateFrequency.keys.count)
+        longestStreak = max 
+        var dateCount = dateFrequency.keys.count
+        if (dateCount == 0){
+            dateCount = 1
+        }
+        averagePerDay = Double(words.count/dateCount)
     }
 }
 
@@ -218,85 +284,174 @@ struct ImageCard: View {
     let totalAmount: String
     
     var body: some View {
-        VStack {
+        VStack(spacing: 10) { // Adjust spacing
             image
                 .resizable()
                 .scaledToFit()
-                .frame(height: 100) // Adjust size as needed
-                .clipShape(Rectangle()) // Optional styling
-                .shadow(radius: 5)  // Optional styling
-                .padding(.bottom, 10)
+                .frame(height: 120) // Larger and proportionate
+                .clipShape(RoundedRectangle(cornerRadius: 10)) // Rounded corners
+                .shadow(radius: 5)
             
             Text(description)
-                .font(.system(size: 12))
+                .font(.headline) // Larger font for emphasis
                 .multilineTextAlignment(.center)
-                .foregroundColor(.black)
-                .padding(.horizontal)
+                .foregroundColor(.primary) // Dynamic color for light/dark mode
             
             Text(totalAmount)
-                .font(.system(size: 12))
+                .font(.subheadline)
                 .multilineTextAlignment(.center)
-                .foregroundColor(.black)
-                .padding(.horizontal)
+                .foregroundColor(.secondary) // Subtle secondary color
         }
-        .frame(width: 250, height: 200) // Adjust card size as needed
-        .background(Color.white)
+        .padding() // Internal spacing
+        .frame(width: 250, height: 200) // Uniform card size
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.white, Color.blue.opacity(0.1)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
         .cornerRadius(15)
-        .shadow(color: .gray.opacity(0.4), radius: 8, x: 0, y: 4)
+        .shadow(color: .gray.opacity(0.3), radius: 10, x: 0, y: 5) // Improved shadow effect
     }
 }
 
-
-struct WordGroups: View{
+struct WordGroups: View {
     var body: some View {
-        ScrollView{
-            VStack{
-                NavigationLink(destination: CollectionPage(title: "Hundred")) {
-                    ImageCard(
-                        image: Image(systemName: "book.pages"),
-                        description: "100 Most Used Nouns",
-                        totalAmount: "(100 words)"
-                    )
+        ZStack {
+            // Solid background color for the entire view
+            Color.purple.opacity(0.1)
+                .edgesIgnoringSafeArea(.all)
+            
+            ScrollView {
+                VStack(alignment: .center, spacing: 20) {
+                    // Simplified Title Section
+                    Text("Collections")
+                        .font(.system(size: 35, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(
+                            LinearGradient(gradient: Gradient(colors: [.blue, .purple]), startPoint: .leading, endPoint: .trailing)
+                                .cornerRadius(10)
+                        )
+                        .shadow(color: .gray.opacity(0.5), radius: 10, x: 0, y: 5)
+                        .padding(.bottom, 20)
+                        .frame(maxWidth: .infinity)
+                        .multilineTextAlignment(.center)
+                    
+                    // Cards Section
+                    VStack(spacing: 15) {
+                        // Simplified NavigationLinks with cards
+                        NavigationLink(destination: CollectionPage(title: "Hundred")) {
+                            ImageCard(
+                                image: Image(systemName: "book.pages"),
+                                description: "100 Most Used Nouns",
+                                totalAmount: "(100 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "Time")) {
+                            ImageCard(
+                                image: Image(systemName: "timer"),
+                                description: "Time",
+                                totalAmount: "(26 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "Technology")) {
+                            ImageCard(
+                                image: Image(systemName: "network"),
+                                description: "Technology",
+                                totalAmount: "(19 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "Places")) {
+                            ImageCard(
+                                image: Image(systemName: "map"),
+                                description: "Places",
+                                totalAmount: "(19 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "Pronouns")) {
+                            ImageCard(
+                                image: Image(systemName: "figure.wave"),
+                                description: "Pronouns",
+                                totalAmount: "(39 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "Emotions")) {
+                            ImageCard(
+                                image: Image(systemName: "person.3.fill"),
+                                description: "Emotions",
+                                totalAmount: "(22 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "Travel")) {
+                            ImageCard(
+                                image: Image(systemName: "airplane.arrival"),
+                                description: "Travel",
+                                totalAmount: "(18 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "Science")) {
+                            ImageCard(
+                                image: Image(systemName: "testtube.2"),
+                                description: "Science",
+                                totalAmount: "(19 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "Literature")) {
+                            ImageCard(
+                                image: Image(systemName: "text.book.closed"),
+                                description: "Literature",
+                                totalAmount: "(35 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "Health")) {
+                            ImageCard(
+                                image: Image(systemName: "stethoscope.circle"),
+                                description: "Health",
+                                totalAmount: "(36 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "Business")) {
+                            ImageCard(
+                                image: Image(systemName: "building.2"),
+                                description: "Business",
+                                totalAmount: "(28 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "Professions")) {
+                            ImageCard(
+                                image: Image(systemName: "person.text.rectangle"),
+                                description: "Professions",
+                                totalAmount: "(29 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "TOEFL")) {
+                            ImageCard(
+                                image: Image(systemName: "append.page"),
+                                description: "TOEFL test",
+                                totalAmount: "(79 words)"
+                            )
+                        }
+                        NavigationLink(destination: CollectionPage(title: "Phrasal")) {
+                            ImageCard(
+                                image: Image(systemName: "textformat.size"),
+                                description: "Phrasal Verbs",
+                                totalAmount: "(68 words)"
+                            )
+                        }
+                    }
+                    .padding(.horizontal) // Add padding to the card stack
+                    .frame(maxWidth: .infinity) // Center cards horizontally
                 }
-                NavigationLink(destination: CollectionPage(title: "Time")) {
-                    ImageCard(
-                        image: Image(systemName: "timer"),
-                        description: "Words for time",
-                        totalAmount: "(21 words)"
-                    )
-                }
-                NavigationLink(destination: CollectionPage(title: "Technology")) {
-                    ImageCard(
-                        image: Image(systemName: "network"),
-                        description: "Words associated with technology",
-                        totalAmount: "(19 words)"
-                    )
-                }
-                NavigationLink(destination: CollectionPage(title: "Places")) {
-                    ImageCard(
-                        image: Image(systemName: "map"),
-                        description: "Words for places in a city",
-                        totalAmount: "(19 words)"
-                    )
-                }
-                NavigationLink(destination: CollectionPage(title: "Pronouns")) {
-                    ImageCard(
-                        image: Image(systemName: "figure.wave"),
-                        description: "Pronouns in the English Language",
-                        totalAmount: "(39 words)"
-                    )
-                }
-                NavigationLink(destination: CollectionPage(title: "Emotions")) {
-                    ImageCard(
-                        image: Image(systemName: "person.3.fill"),
-                        description: "Emotions",
-                        totalAmount: "(22 words)"
-                    )
-                }
+                .frame(maxWidth: .infinity) // Center the entire VStack inside the ScrollView
+                .padding() // Add some padding around the ScrollView content
             }
         }
     }
+
 }
+
 
 struct RandomWordPage: View, getAmericanDate{
     @Environment(\.modelContext) private var context
@@ -321,113 +476,131 @@ struct RandomWordPage: View, getAmericanDate{
     var body: some View {
         let colorArray = [blue, argentinianBlue, deepSkyBlue, aqua, celeste]
         
-        ZStack{
+        ZStack {
             GeometryReader { geometry in
                 Circle()
-                    .offset(x: -300, y: -400)
-                    .frame(width: 1000, height: 820)
+                    .offset(x: -geometry.size.width * 0.4, y: -geometry.size.height * 0.5)
+                    .frame(width: geometry.size.width * 1.5, height: geometry.size.height * 1.2)
                     .foregroundColor(Color(red: 0.949, green: 0.950, blue: 0.85))
             }
             .edgesIgnoringSafeArea(.all)
-            .offset(y: -150)
             
-            VStack(spacing: 20) {
+            VStack(spacing: 30) {
+                Spacer()
+                
                 Text("Random Word")
-                    .font(.system(size: 50))
+                    .fontWeight(.bold)
+                    .foregroundColor(.blue)
+                    .font(Font.custom("Rockwell-Regular", size: 40, relativeTo: .title))
+                
                 Spacer()
                 
                 Text("""
                     In here, you will get a random word. You should provide an example and a description for it.
                     Press "New Word" to start and to change the word provided.
                     """)
-                    .font(.system(size: 25))
+                    .font(.body)
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
                     .frame(width: 350)
-                    .offset(y: -150)
+                
                 Spacer()
                 
-                Button("New Word") {
+                Button(action: {
                     updateWord(colorArray: colorArray)
+                })
+                {
+                    Text("New Word")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered)
-                .foregroundColor(.black)
+                .buttonStyle(.borderedProminent)
+                .tint(.blue)
+                .frame(width: 200)
                 
                 Spacer()
                 
-                Button("Submit Word") {
-                    if (considerExample(word: newWord, example: newExample)) {
+                VStack(spacing: 15) {
+                    Text(newWord.capitalized)
+                        .font(.title)
+                        .fontWeight(.semibold)
+                        .foregroundColor(randomWordColor)
+                        .opacity(wordOpacity) // Bind opacity to the state variable
+                        .underline(true)
+                    
+                    // Example TextField
+                    TextField("Enter an example...", text: $newExample)
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.blue.opacity(0.2)))
+                        .font(.body)
+                        .opacity(wordOpacity)
+                        .autocorrectionDisabled(true)
+                    
+                    // Description TextField
+                    TextField("Enter a description...", text: $newDefinition)
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color.orange.opacity(0.2)))
+                        .font(.body)
+                        .opacity(wordOpacity)
+                        .autocorrectionDisabled(true)
+                }
+                .padding(.horizontal, 20)
+                
+                if !validExample {
+                    Text("The example does not utilize the word.")
+                        .font(.footnote)
+                        .foregroundColor(.red)
+                }
+                
+                if wordAdded {
+                    Text("The word was successfully added!")
+                        .font(.footnote)
+                        .foregroundColor(.green)
+                }
+                
+                Button(action: {
+                    if considerExample(word: newWord, example: newExample) {
                         validExample = true
                         wordAdded = true
-                        let newWord = Word(wordInit: newWord.capitalized, exampleInit: newExample, descriptionInit: newDefinition, date: formattedDateAmericanStyle(from: Date.now), source: "Random") // Create object
-                        context.insert(newWord) // Insert object to context
-                        wordAdded = true
+                        
+                        let newWord = Word(
+                            wordInit: newWord.capitalized,
+                            exampleInit: newExample,
+                            descriptionInit: newDefinition,
+                            date: formattedDateAmericanStyle(from: Date.now),
+                            source: "Random"
+                        )
+                        
+                        context.insert(newWord)
+                        
+                        self.newExample = ""
+                        self.newDefinition = ""
                         
                         do {
                             try context.save()
-                            print("SAVE")
                         }
                         catch {
                             print("Error saving context: \(error)")
                         }
                         
-                        print("The word was saved")
                         updateWord(colorArray: colorArray)
                     }
                     else {
                         validExample = false
                     }
+                })
+                {
+                    Text("Submit Word")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .frame(width: 200)
+                
+                Spacer()
             }
-            
-            Spacer()
-            
-            VStack(spacing: -10) {
-                Text(newWord.capitalized)
-                    .font(.system(size: 40))
-                    .foregroundColor(randomWordColor)
-                    .offset(y: -10)
-                    .opacity(wordOpacity) // Bind opacity to the state variable
-                    .underline(true)
-                
-                // Example TextField
-                TextField("Example", text: $newExample)
-                    .padding()
-                    .disableAutocorrection(true)
-                    .background(
-                        Rectangle()
-                            .foregroundColor(.blue)
-                            .frame(height: 50)
-                            .cornerRadius(10)
-                    )
-                    .font(.system(size: 30))
-                    .offset(x: 50)
-                
-                // Description TextField
-                TextField("Description", text: $newDefinition)
-                    .padding()
-                    .disableAutocorrection(true)
-                    .background(
-                        Rectangle()
-                            .foregroundColor(.orange)
-                            .frame(height: 50)
-                            .cornerRadius(10)
-                    )
-                    .font(.system(size: 30))
-                    .offset(x: 50)
-                
-                Text(validExample ? "" : """
-                    The example does not utilize the word
-                    """)
-                .frame(width: 500)
-                .frame(height: 50)
-                
-                Text(wordAdded ? """
-                    The word was successfully added!
-                    """ : "")
-                .frame(width: 500)
-                .frame(height: 50)
-            }
+            .padding()
         }
     }
 
@@ -573,106 +746,123 @@ struct UpdateWordSheet: View{
     
 }
 
-struct SeeWordsPage: View {
+struct SeeWordsPage: View, getColorForCollection {
     @Query private var words: [Word]
     @Environment(\.modelContext) var context
+    
     @State private var wordEdit: Word?
     @State private var opacityRatio: Double = 1.0
     @State private var typeColor: Color = .blue
     
     var body: some View {
-        if (words.count != 0){
-            NavigationStack {
-                List{
-                    Section() {
-                        Image("backgroundSee")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 350, height: 200, alignment: .center)
-                    }
-                    .listSectionSpacing(.compact)
-                    Section {
-                        HStack {
-                            Spacer()
-                            Text("Word")
-                                .frame(maxWidth: .infinity, alignment: .center)
-                            Spacer()
-                            Text("Date")
-                                .frame(maxWidth: .infinity, alignment: .center)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: 5)
-                        .padding()
-                    }
-                    .listSectionSpacing(.compact)
-                    .listRowBackground(
-                        Capsule()
-                            .fill(.white)
-                            .frame(maxWidth: .infinity, maxHeight: 30)
-                            .padding()
+        if words.count != 0 {
+            VStack(spacing: 0) {
+                Text("Words Learned")
+                    .font(Font.custom("Rockwell-Regular", size: 50, relativeTo: .title))
+                    .foregroundColor(.white)
+                    .padding([.top, .leading, .trailing])  // Padding only on sides and top to avoid extra space at the bottom
+                    .background(
+                        LinearGradient(gradient: Gradient(colors: [.blue, .purple]), startPoint: .leading, endPoint: .trailing)
+                            .frame(height: 125)
                     )
-                    ForEach(Array(words.enumerated()), id: \.offset) { index, word in
-                        let typeColor = setColor(source: word.source)
-                        WordCell(word: word)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .onTapGesture {
-                                wordEdit = word
+                    .cornerRadius(10)
+                    .multilineTextAlignment(.center) // Center text within the `Text` view
+                    .frame(maxWidth: .infinity) // Ensure the text spans the entire width to center
+                    .onAppear()
+                
+                NavigationStack {
+                    List {
+                        Section {
+                            HStack {
+                                Spacer()
+                                Text("Word")
+                                    .font(.headline)
+                                    .foregroundColor(.blue)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                Spacer()
+                                Text("Date")
+                                    .font(.headline)
+                                    .foregroundColor(.blue)
+                                    .frame(maxWidth: .infinity, alignment: .center)
                             }
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(
-                                Capsule()
-                                    .fill(typeColor)
-                                    .padding(.vertical, 2)
-                                    .padding(.horizontal, 20)
-                            )
-                    }
-                    .onDelete{
-                        indexSet in
-                        for index in indexSet{
-                            context.delete(words[index])
-                            try! context.save()
+                            .padding(.vertical, 8)
+                        }
+                        .listSectionSpacing(.compact)
+                        .listRowBackground(
+                            Capsule()
+                                .fill(Color.white.opacity(0.8))
+                                .frame(maxWidth: .infinity)
+                                .shadow(radius: 2)
+                                .padding(.horizontal, 10)
+                        )
+
+                        ForEach(Array(words.enumerated()).reversed(), id: \.offset) { index, word in
+                            let typeColor = setColor(source: word.source)
+                            WordCell(word: word)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .onTapGesture {
+                                    wordEdit = word
+                                }
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(
+                                    Capsule()
+                                        .fill(typeColor)
+                                        .padding(.vertical, 2)
+                                        .padding(.horizontal, 20)
+                                )
+                        }
+                        .onDelete { indexSet in
+                            for index in indexSet {
+                                context.delete(words[index])
+                                try! context.save()
+                            }
                         }
                     }
-                }
-                .navigationTitle("Words Added")
-                .navigationBarTitleDisplayMode(.large)
-                .sheet(item:$wordEdit){
-                    word in UpdateWordSheet(word: word)
+                    .sheet(item: $wordEdit) { word in
+                        UpdateWordSheet(word: word)
+                    }
                 }
             }
+            .background(Color(red: 0.949, green: 0.949, blue: 0.968))
         }
-        else{
-            VStack (spacing: 25){
+        else {
+            VStack(spacing: 25) {
                 Image(systemName: "exclamationmark.circle")
                     .font(.system(size: 100))
+                    .foregroundColor(.orange)
+                    .shadow(radius: 5)
+                
                 Text("""
-                    It seems like you haven't added any words yet.
-                    You can click "Add Word" in the main menu to start.
-                    """)
-                    .font(.system(size: 25))
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-                    .padding(.trailing, 20)
-                    .offset(x: 10)
+                It seems like you haven't added any words yet.
+                You can click "Add Word" in the main menu to start.
+                """)
+                .font(.body)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [.white, .blue.opacity(0.1)]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .edgesIgnoringSafeArea(.all)
+            )
         }
     }
     
     func setColor(source: String) -> Color{
         
-//        let blue = Color(red: 0.04, green: 1.0, blue: 1.0)
-        let argentinianBlue = Color(red: 0.376, green: 0.686, blue: 1.0)
-        let deepSkyBlue = Color(red: 0.156, green: 0.76, blue: 1.0)
-//        let aqua = Color(red: 0.164, green: 0.96, blue: 1.0)
-        let celeste = Color(red: 0.725, green: 0.98, blue: 0.97)
-        
         if (source == "Added"){
-            return argentinianBlue
+            return Color(red: 0.376, green: 0.686, blue: 1.0).opacity(0.7)
         }
         else if (source == "Random"){
-            return deepSkyBlue
+            return Color(red: 0.156, green: 0.76, blue: 1.0).opacity(0.7)
         }
         else{
-            return celeste
+            return decideBackgroundColor(sectionName: source)
         }
     }
 }
@@ -683,11 +873,13 @@ struct Collection: Codable {
     let wordSet: [String]
 }
 
-struct CollectionPage: View, getAmericanDate {
+struct CollectionPage: View, getAmericanDate, getColorForCollection {
     @Query private var words: [Word]
     
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    
+    @State private var backgroundColor: Color = Color.purple.opacity(0.2)
     
     @State private var collection: Collection?
     @State var definition: String = ""
@@ -706,15 +898,18 @@ struct CollectionPage: View, getAmericanDate {
 
     var body: some View {
         ZStack {
+            // Background Circle
             GeometryReader { _ in
                 Circle()
-                    .offset(x: -200, y: -300)
+                    .offset(x: -200, y: -300) // Adjust as needed for desired placement
                     .frame(width: 900, height: 740)
-                    .foregroundColor(Color.purple.opacity(0.2))
+                    .foregroundColor(self.backgroundColor)
             }
             .edgesIgnoringSafeArea(.all)
-            if (currentWord == "No more words"){
-                VStack (spacing: 25){
+            
+            // Main Content
+            if currentWord == "No more words" {
+                VStack(spacing: 25) {
                     Image(systemName: "checkmark.seal.fill")
                         .font(.system(size: 100))
                     Text("""
@@ -724,13 +919,12 @@ struct CollectionPage: View, getAmericanDate {
                         .font(.system(size: 25))
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
-                        .padding(.trailing, 20)
-                        .offset(x: 10)
+                        .padding(.horizontal)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity) // Centering the VStack
             }
-            else if (!currentWord.isEmpty) {
+            else if !currentWord.isEmpty {
                 VStack {
-                    // Title and descriptive text
                     Text(title)
                         .font(.system(size: 60, weight: .bold, design: .rounded))
                         .foregroundColor(.purple)
@@ -748,9 +942,7 @@ struct CollectionPage: View, getAmericanDate {
                     
                     Spacer()
                     
-                    // Form Section
                     VStack(spacing: 25) {
-                        // Word display
                         Text(currentWord)
                             .padding()
                             .background(
@@ -760,8 +952,8 @@ struct CollectionPage: View, getAmericanDate {
                             )
                             .font(.system(size: 32))
                             .padding(.horizontal, 20)
+                            .opacity(wordOpacity)
                         
-                        // Example input
                         TextField("Example", text: $example)
                             .disableAutocorrection(true)
                             .padding()
@@ -772,8 +964,8 @@ struct CollectionPage: View, getAmericanDate {
                             )
                             .font(.system(size: 32))
                             .padding(.horizontal, 20)
+                            .opacity(wordOpacity)
                         
-                        // Description input
                         TextField("Description", text: $description)
                             .disableAutocorrection(true)
                             .padding()
@@ -784,15 +976,14 @@ struct CollectionPage: View, getAmericanDate {
                             )
                             .font(.system(size: 32))
                             .padding(.horizontal, 20)
+                            .opacity(wordOpacity)
                         
-                        // Submit Button
                         Button("Submit Word") {
                             handleWordSubmission()
                         }
                         .buttonStyle(.borderedProminent)
                         .disabled(!isFormValid)
                         
-                        // Messages
                         if !validWord {
                             Text("The given word does not seem to be valid. Please check and try again.")
                                 .foregroundColor(.red)
@@ -815,22 +1006,31 @@ struct CollectionPage: View, getAmericanDate {
                     
                     Spacer()
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity) // Centering the VStack
             }
             else {
-                // Loading State
                 VStack {
                     Text("Loading...")
                         .font(.system(size: 24))
                         .foregroundColor(.gray)
                     Spacer()
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity) // Centering the VStack
             }
         }
         .onAppear {
+            self.backgroundColor = decideBackgroundColor(sectionName: self.title)
             initializeWords()
         }
     }
 
+    func capitalizeFirstLetter(of string: String) -> String {
+        guard !string.isEmpty else { return string }
+        let firstLetter = string.prefix(1).uppercased()
+        let remainingLetters = string.dropFirst()
+        return firstLetter + remainingLetters
+    }
+    
     func considerExample(word: String, example: String) -> Bool{
         return example.lowercased().contains(word.lowercased())
     }
@@ -874,6 +1074,11 @@ struct CollectionPage: View, getAmericanDate {
         newWords = collection?.wordSet.filter { !existingWords.contains($0) } ?? []
         currentWord = newWords.first ?? "No more words"
     }
+    
+    func countWords(in string: String) -> Int {
+        let words = string.split { $0.isWhitespace || $0.isPunctuation }
+        return words.count
+    }
 
     // Handle word submission
     private func handleWordSubmission() {
@@ -884,7 +1089,7 @@ struct CollectionPage: View, getAmericanDate {
         
         validExample = true
         let newWord = Word(
-            wordInit: currentWord.capitalized,
+            wordInit: countWords(in: currentWord) > 1 ? capitalizeFirstLetter(of: currentWord) : currentWord.capitalized,
             exampleInit: example,
             descriptionInit: description,
             date: formattedDateAmericanStyle(from: Date()),
@@ -892,12 +1097,15 @@ struct CollectionPage: View, getAmericanDate {
         )
         
         context.insert(newWord)
+        self.example = ""
+        self.description = ""
         
         do {
             try context.save()
             wordAdded = true
             updateNextWord()
-        } catch {
+        }
+        catch {
             print("Error saving context: \(error)")
         }
     }
@@ -905,7 +1113,20 @@ struct CollectionPage: View, getAmericanDate {
     // Update to the next word
     private func updateNextWord() {
         newWords.removeFirst()
-        currentWord = newWords.first ?? "No more words"
+        
+        withAnimation(.easeInOut(duration: 0.5)) {
+            wordOpacity = 0.0
+        }
+        
+        // Step 2: Wait, update the word, and fade in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            currentWord = newWords.first ?? "No more words"
+            
+            // Step 3: Fade in
+            withAnimation(.easeInOut(duration: 0.5)) {
+                wordOpacity = 1.0
+            }
+        }
     }
 }
 
@@ -920,6 +1141,7 @@ struct AddWordPage: View, getAmericanDate {
     @State var validWord = true;
     @State var validExample = true
     @State var wordAdded = false
+    @State var wordOpacity: Double = 1.0
     
     let wordBack = Color(red: 0.81, green: 0.73, blue: 0.89)
     let exampleBack = Color(red: 0.83, green: 0.75, blue: 0.89)
@@ -931,7 +1153,7 @@ struct AddWordPage: View, getAmericanDate {
     }
 
     var body: some View {
-        ZStack{
+        ZStack {
             GeometryReader { geometry in
                 Circle()
                     .offset(x: -300, y: -400)
@@ -939,86 +1161,99 @@ struct AddWordPage: View, getAmericanDate {
                     .foregroundColor(logoColor)
             }
             .edgesIgnoringSafeArea(.all)
-            VStack{
+
+            VStack(spacing: 20) {
+                // Title Text
                 Text("Add Word")
-                    .font(.system(size: 50))
-                Text("In here you can add new words to your vocabulary.")
+                    .fontWeight(.bold)
+                    .foregroundColor(.blue)
+                    .font(Font.custom("Rockwell-Regular", size: 40, relativeTo: .title))
+
+                // Descriptions
+                Text("In here you can add new\nwords to your vocabulary.")
                     .font(.system(size: 25))
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
+
                 Text("Provide a short description and an example for every word. This is made to ensure you understand the words you are adding.")
                     .font(.system(size: 25))
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
-                    .padding(.trailing, 20)
+                    .padding(.horizontal, 20)
+
                 Spacer()
-                VStack(spacing: 20){
-                    TextField(
-                        "Word",
-                        text: $word
-                    )
-                    .disableAutocorrection(true)
-                    .background(
-                        Rectangle()
-                            .foregroundColor(wordBack)
-                            .frame(height: 50)
-                            .offset(x: -50)
-                    )
-                    .font(.system(size: 30))
-                    
-                    TextField(
-                        "Example",
-                        text: $example
-                    )
-                    .disableAutocorrection(true)
-                    .background(
-                        Rectangle()
-                            .foregroundColor(exampleBack)
-                            .frame(height: 50)
-                            .offset(x: -50)
-                    )
-                    .font(.system(size: 30))
-                    
-                    TextField(
-                        "Description",
-                        text: $description
-                    )
-                    .disableAutocorrection(true)
-                    .background(
-                        Rectangle()
-                            .foregroundColor(descriptionBack)
-                            .frame(height: 50)
-                            .offset(x: -50)
-                    )
-                    .font(.system(size: 30))
-                    
+
+                // Form Fields and Button
+                VStack(spacing: 20) {
+                    // Word TextField
+                    TextField("Word", text: $word)
+                        .disableAutocorrection(true)
+                        .padding()
+                        .background(
+                            Rectangle()
+                                .foregroundColor(wordBack)
+                                .cornerRadius(10)
+                        )
+                        .font(.system(size: 30))
+                        .padding(.horizontal, 20)
+                        .opacity(wordOpacity)
+
+                    // Example TextField
+                    TextField("Example", text: $example)
+                        .disableAutocorrection(true)
+                        .padding()
+                        .background(
+                            Rectangle()
+                                .foregroundColor(exampleBack)
+                                .cornerRadius(10)
+                        )
+                        .font(.system(size: 30))
+                        .padding(.horizontal, 20)
+                        .opacity(wordOpacity)
+
+                    // Description TextField
+                    TextField("Description", text: $description)
+                        .disableAutocorrection(true)
+                        .padding()
+                        .background(
+                            Rectangle()
+                                .foregroundColor(descriptionBack)
+                                .cornerRadius(10)
+                        )
+                        .font(.system(size: 30))
+                        .padding(.horizontal, 20)
+                        .opacity(wordOpacity)
+
+                    // Submit Button
                     Button("Submit Word") {
-                        if (considerExample(word: word, example: example)){
+                        if considerExample(word: word, example: example) {
                             considerWord(word: word)
                             validExample = true
-                        }
-                        else{
+                        } else {
                             validExample = false
                         }
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(!isFormValid)
-                    
+
+                    // Validation Messages
                     Text(validWord ? "" : """
                         The given word does not seem to be valid
                         Please check if you have typed it correctly and try again
                         """)
+                        .multilineTextAlignment(.center)
+
                     Text(validExample ? "" : """
                         The example does not utilize the word
                         """)
-                    Text(wordAdded ? """
-                        The word was sucessufuly added!
-                        """ : "")
-                    .multilineTextAlignment(.center)
+                        .multilineTextAlignment(.center)
+
+                    Text(wordAdded ? "The word was successfully added!" : "")
+                        .multilineTextAlignment(.center)
                 }
-                .offset(x: 20)
-                .padding(.trailing, 50)
-                
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+
                 Spacer()
             }
         }
@@ -1031,12 +1266,26 @@ struct AddWordPage: View, getAmericanDate {
     func considerWord(word: String){
         isWordInFile(word:word.lowercased(), description:description, example:example)
     }
+    
+    func updateWord() {
+        // Step 1: Fade out
+        withAnimation(.easeInOut(duration: 0.5)) {
+            wordOpacity = 0.0
+        }
+        
+        // Step 2: Wait, update the word, and fade in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+           
+            // Step 3: Fade in
+            withAnimation(.easeInOut(duration: 0.5)) {
+                wordOpacity = 1.0
+            }
+        }
+    }
 
     func isWordInFile(word: String, description: String, example: String) -> Void {
-        let fileName = "words_alpha"
-        let fileType = "txt"
         // Locating the file in the app bundle
-        guard let fileURL = Bundle.main.url(forResource: fileName, withExtension: fileType) else {
+        guard let fileURL = Bundle.main.url(forResource: "words_alpha", withExtension: "txt") else {
             print("File not found in the bundle")
             return
         }
@@ -1047,19 +1296,20 @@ struct AddWordPage: View, getAmericanDate {
             
             // Searching for the word in the file content
             if fileContents.contains(word) {
-                print("The word '\(word)' was found in the file.")
                 let newWord = Word(wordInit: word.capitalized, exampleInit: example, descriptionInit: description, date:formattedDateAmericanStyle(from: Date.now), source: "Added") // Create object
                 context.insert(newWord) // Insert object to context
                 wordAdded = true
                 do {
                     try context.save()
-                    print("SAVE")
+                    
+                    self.word = ""
+                    self.example = ""
+                    self.description = ""
+                    updateWord()
                 }
                 catch {
                     print("Error saving context: \(error)")
                 }
-//                dismiss()  Dismiss context
-                print("The word was saved")
             }
             else {
                 print("The word '\(word)' was NOT found in the file.")

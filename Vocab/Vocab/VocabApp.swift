@@ -3,7 +3,7 @@
 //  Vocab
 //
 //  Created by Bruno Gomes Pascotto on 12/17/24.
-//
+// 
 
 import SwiftUI
 
