@@ -8,6 +8,7 @@
 import SwiftUI
 import Foundation
 import SwiftData
+import Translation
 
 struct ContentView: View {
     @State var backgroundImage: String? = "Utah1"
@@ -122,6 +123,23 @@ struct ContentView: View {
     }
 }
 
+//protocol translateWord{
+//    func translateText(_ text: String, from sourceLanguage: Translate.Language, to targetLanguage: Translate.Language) async -> String?
+//}
+//
+//extension translateWord{
+//    func translateText(_ text: String, from sourceLanguage: Translate.Language, to targetLanguage: Translate.Language) async -> String? {
+//        let translator = Translator(from: sourceLanguage, to: targetLanguage)
+//        do {
+//            let translatedText = try await translator.translate(text)
+//            return translatedText
+//        } catch {
+//            print("Translation failed: \(error)")
+//            return nil
+//        }
+//    }
+//}
+
 protocol getAmericanDate{
     func formattedDateAmericanStyle(from date: Date) -> String
 
@@ -194,7 +212,7 @@ struct StatisticCard: View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
                 .font(.headline)
-                .foregroundColor(.primary)
+                .foregroundColor(.black)
             
             Text(value)
                 .font(.title2)
@@ -295,7 +313,7 @@ struct ImageCard: View {
             Text(description)
                 .font(.headline) // Larger font for emphasis
                 .multilineTextAlignment(.center)
-                .foregroundColor(.primary) // Dynamic color for light/dark mode
+                .foregroundColor(.black) // Dynamic color for light/dark mode
             
             Text(totalAmount)
                 .font(.subheadline)
@@ -428,7 +446,7 @@ struct WordGroups: View {
                         }
                         NavigationLink(destination: CollectionPage(title: "TOEFL")) {
                             ImageCard(
-                                image: Image(systemName: "append.page"),
+                                image: Image(systemName: "paperclip.circle"),
                                 description: "TOEFL test",
                                 totalAmount: "(79 words)"
                             )
@@ -460,8 +478,13 @@ struct RandomWordPage: View, getAmericanDate{
     @State var newWord: String = ""
     @State var newDefinition: String = ""
     @State var newExample: String = ""
+    @State var translatedText: String = ""
     @State var wordOpacity = 1.0
     
+    @State private var translationVisible = false
+    @State private var showTranslation = false
+    @State private var sampleText = ""
+
     @State var validExample = true
     @State var wordAdded = false
     @State var validWord = false
@@ -499,10 +522,10 @@ struct RandomWordPage: View, getAmericanDate{
                     In here, you will get a random word. You should provide an example and a description for it.
                     Press "New Word" to start and to change the word provided.
                     """)
-                    .font(.body)
-                    .foregroundColor(.black)
-                    .multilineTextAlignment(.center)
-                    .frame(width: 350)
+                .font(.body)
+                .foregroundColor(.black)
+                .multilineTextAlignment(.center)
+                .frame(width: 350)
                 
                 Spacer()
                 
@@ -514,9 +537,6 @@ struct RandomWordPage: View, getAmericanDate{
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.blue)
-                .frame(width: 200)
                 
                 Spacer()
                 
@@ -545,6 +565,21 @@ struct RandomWordPage: View, getAmericanDate{
                         .autocorrectionDisabled(true)
                 }
                 .padding(.horizontal, 20)
+                if #available(iOS 17.4, *) {
+                    VStack {
+                        Button("Translate") {
+                            showTranslation.toggle()
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    // Offer a system UI translation.
+                    .translationPresentation(isPresented: $showTranslation,
+                                             text: newWord)
+                    .navigationTitle("Translate")
+                }
+                else {
+                    Text("Translation is currently not available for this iOS version")
+                }
                 
                 if !validExample {
                     Text("The example does not utilize the word.")
@@ -568,7 +603,8 @@ struct RandomWordPage: View, getAmericanDate{
                             exampleInit: newExample,
                             descriptionInit: newDefinition,
                             date: formattedDateAmericanStyle(from: Date.now),
-                            source: "Random"
+                            source: "Random",
+                            translation: translatedText
                         )
                         
                         context.insert(newWord)
@@ -683,6 +719,7 @@ struct WordCell: View {
 struct UpdateWordSheet: View{
     @Environment(\.dismiss) private var dismiss
     @Bindable var word: Word
+    @State private var showTranslation = false
     
     var isFormValid: Bool {
         return !word.word.isEmpty && !word.example.isEmpty && !word.wordDescription.isEmpty
@@ -728,6 +765,23 @@ struct UpdateWordSheet: View{
                             .foregroundStyle(.gray)
                     }
                     
+                    HStack {
+                        Text("Translate Word:")
+                        Spacer()
+                        if #available(iOS 17.4, *) {
+                            VStack {
+                                Button("Translate") {
+                                    showTranslation.toggle()
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                            .translationPresentation(isPresented: $showTranslation, text: word.word)
+                            .navigationTitle("Translate")
+                        }
+                        else {
+                            Text("Translation is currently not available for this iOS version")
+                        }
+                    }
                 }
             }
             .navigationTitle("Update Word")
@@ -884,6 +938,8 @@ struct CollectionPage: View, getAmericanDate, getColorForCollection {
     @State private var collection: Collection?
     @State var definition: String = ""
     @State var title: String = ""
+    @State private var showTranslation = false
+    @State var translatedText: String = ""
     
     @State private var newWords: [String] = []
     @State private var currentWord: String = ""
@@ -983,6 +1039,20 @@ struct CollectionPage: View, getAmericanDate, getColorForCollection {
                         }
                         .buttonStyle(.borderedProminent)
                         .disabled(!isFormValid)
+                        
+                        if #available(iOS 17.4, *) {
+                            VStack {
+                                Button("Translate") {
+                                    showTranslation.toggle()
+                                }
+                                .buttonStyle(.borderedProminent)
+                            }
+                            .translationPresentation(isPresented: $showTranslation, text: currentWord)
+                            .navigationTitle("Translate")
+                        }
+                        else {
+                            Text("Translation is currently not available for this iOS version")
+                        }
                         
                         if !validWord {
                             Text("The given word does not seem to be valid. Please check and try again.")
@@ -1093,7 +1163,8 @@ struct CollectionPage: View, getAmericanDate, getColorForCollection {
             exampleInit: example,
             descriptionInit: description,
             date: formattedDateAmericanStyle(from: Date()),
-            source: self.title
+            source: self.title,
+            translation: translatedText
         )
         
         context.insert(newWord)
@@ -1135,18 +1206,19 @@ struct AddWordPage: View, getAmericanDate {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     
-    @State private var word: String = ""
-    @State private var example: String = ""
-    @State private var description: String = ""
-    @State var validWord = true;
+    @State private var word: String             = ""
+    @State private var example: String          = ""
+    @State private var description: String      = ""
+    @State private var translatedText: String   = ""
+    @State var validWord    = true;
     @State var validExample = true
-    @State var wordAdded = false
+    @State var wordAdded    = false
     @State var wordOpacity: Double = 1.0
     
-    let wordBack = Color(red: 0.81, green: 0.73, blue: 0.89)
-    let exampleBack = Color(red: 0.83, green: 0.75, blue: 0.89)
+    let wordBack        = Color(red: 0.81, green: 0.73, blue: 0.89)
+    let exampleBack     = Color(red: 0.83, green: 0.75, blue: 0.89)
     let descriptionBack = Color(red: 0.81, green: 0.73, blue: 1)
-    let logoColor = Color(red: 0.90, green: 0.92, blue: 1)
+    let logoColor       = Color(red: 0.90, green: 0.92, blue: 1)
     
     var isFormValid: Bool {
         return !word.isEmpty && !example.isEmpty && !description.isEmpty
@@ -1296,7 +1368,14 @@ struct AddWordPage: View, getAmericanDate {
             
             // Searching for the word in the file content
             if fileContents.contains(word) {
-                let newWord = Word(wordInit: word.capitalized, exampleInit: example, descriptionInit: description, date:formattedDateAmericanStyle(from: Date.now), source: "Added") // Create object
+                let newWord = Word(
+                    wordInit: word.capitalized,
+                    exampleInit: example,
+                    descriptionInit: description,
+                    date:formattedDateAmericanStyle(from: Date.now),
+                    source: "Added",
+                    translation: translatedText
+                ) // Create object
                 context.insert(newWord) // Insert object to context
                 wordAdded = true
                 do {
